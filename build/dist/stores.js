@@ -1,5 +1,5 @@
 
-import { writable, derived } from 'svelte/store';
+import { writable, derived } from '../web_modules/svelte/store.js';
 
 export const page = writable("Home")
 export const dags = writable([])

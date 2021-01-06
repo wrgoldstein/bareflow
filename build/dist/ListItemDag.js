@@ -7,6 +7,7 @@ import {
 	element,
 	init,
 	insert,
+	listen,
 	noop,
 	safe_not_equal,
 	set_data,
@@ -35,10 +36,13 @@ function create_fragment(ctx) {
 	let t5;
 	let t6;
 	let td2;
-	let t10;
+	let t8;
 	let td3;
-	let t13;
+	let t10;
 	let td4;
+	let a;
+	let mounted;
+	let dispose;
 
 	return {
 		c() {
@@ -59,19 +63,14 @@ function create_fragment(ctx) {
 			t5 = text(t5_value);
 			t6 = space();
 			td2 = element("td");
-
-			td2.innerHTML = `<span class="text-xs text-gray-600">(placeholder)</span> 
-    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>`;
-
-			t10 = space();
+			td2.innerHTML = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>`;
+			t8 = space();
 			td3 = element("td");
-
-			td3.innerHTML = `<span class="text-xs text-gray-600">(placeholder)</span>
-    🍏🍏🍏🍏🍏🍏🍏🍏💀💀🍏🍏🍏🍏`;
-
-			t13 = space();
+			td3.textContent = "🍏🍎🍎🍏🍏🍏🍏";
+			t10 = space();
 			td4 = element("td");
-			td4.innerHTML = `<a href="#" class="text-indigo-600 hover:text-indigo-900">View</a>`;
+			a = element("a");
+			a.textContent = "View";
 			attr(div0, "class", "text-sm font-medium text-gray-900");
 			attr(div1, "class", "text-sm text-gray-500");
 			attr(div2, "class", "ml-4");
@@ -82,6 +81,7 @@ function create_fragment(ctx) {
 			attr(td1, "class", "px-6 py-4 whitespace-nowrap");
 			attr(td2, "class", "px-6 py-4 whitespace-nowrap");
 			attr(td3, "class", "px-6 py-4 whitespace-nowrap text-sm text-gray-500");
+			attr(a, "class", "text-indigo-600 hover:text-indigo-900");
 			attr(td4, "class", "px-6 py-4 whitespace-nowrap text-right text-sm font-medium");
 		},
 		m(target, anchor) {
@@ -102,10 +102,16 @@ function create_fragment(ctx) {
 			append(div5, t5);
 			append(tr, t6);
 			append(tr, td2);
-			append(tr, t10);
+			append(tr, t8);
 			append(tr, td3);
-			append(tr, t13);
+			append(tr, t10);
 			append(tr, td4);
+			append(td4, a);
+
+			if (!mounted) {
+				dispose = listen(a, "click", /*click_handler*/ ctx[2]);
+				mounted = true;
+			}
 		},
 		p(ctx, [dirty]) {
 			if (dirty & /*dag*/ 1 && t0_value !== (t0_value = /*dag*/ ctx[0].name + "")) set_data(t0, t0_value);
@@ -116,24 +122,28 @@ function create_fragment(ctx) {
 		o: noop,
 		d(detaching) {
 			if (detaching) detach(tr);
+			mounted = false;
+			dispose();
 		}
 	};
 }
 
 function instance($$self, $$props, $$invalidate) {
-	let { dag } = $$props;
+	let { dag } = $$props, { router } = $$props;
+	const click_handler = () => router.route(`/dags/${dag.name}`, true);
 
 	$$self.$$set = $$props => {
 		if ("dag" in $$props) $$invalidate(0, dag = $$props.dag);
+		if ("router" in $$props) $$invalidate(1, router = $$props.router);
 	};
 
-	return [dag];
+	return [dag, router, click_handler];
 }
 
 class ListItemDag extends SvelteComponent {
 	constructor(options) {
 		super();
-		init(this, options, instance, create_fragment, safe_not_equal, { dag: 0 });
+		init(this, options, instance, create_fragment, safe_not_equal, { dag: 0, router: 1 });
 	}
 }
 

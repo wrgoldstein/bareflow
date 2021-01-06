@@ -1,7 +1,8 @@
 <script>
   import Dag from "./ListItemDag.svelte"
+  import { dags } from "./stores.js"
 
-  export let dags
+  export let router
 </script>
 
 <div class="flex flex-col">
@@ -29,8 +30,8 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            {#each dags || [] as dag}
-              <Dag dag={dag} />
+            {#each $dags || [] as dag}
+              <Dag {dag} {router}/>
             {/each}
           </tbody>
         </table>

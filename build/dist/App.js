@@ -6,80 +6,95 @@ import {
 	SvelteComponent,
 	append,
 	attr,
+	check_outros,
+	component_subscribe,
 	create_component,
 	destroy_component,
 	detach,
 	element,
+	group_outros,
 	init,
 	insert,
+	listen,
 	mount_component,
+	noop,
 	safe_not_equal,
 	space,
 	transition_in,
 	transition_out
 } from "../web_modules/svelte/internal.js";
 
+import navaid from "../web_modules/navaid.js";
 import { onMount } from "../web_modules/svelte.js";
 import Dags from "./ListDags.js";
+import Dag from "./ViewDag.js";
+import { dags, page, dag_id } from "./stores.js";
 
-function create_fragment(ctx) {
-	let header;
-	let t0;
-	let div8;
-	let nav;
-	let t11;
-	let main;
-	let div7;
-	let div6;
-	let dags_1;
-	let current;
-	dags_1 = new Dags({ props: { dags: /*dags*/ ctx[0] } });
+function create_else_block(ctx) {
+	let div;
 
 	return {
 		c() {
-			header = element("header");
-			t0 = space();
-			div8 = element("div");
-			nav = element("nav");
-
-			nav.innerHTML = `<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div class="flex items-center justify-between h-16"><div class="flex items-center"><div class="flex-shrink-0"><img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow"/></div> 
-          <div class="hidden md:block"><div class="ml-10 flex items-baseline space-x-4"><a href="#" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">Dags</a> 
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a> 
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a> 
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a> 
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a></div></div></div></div></div>`;
-
-			t11 = space();
-			main = element("main");
-			div7 = element("div");
-			div6 = element("div");
-			create_component(dags_1.$$.fragment);
-			attr(header, "class", "h-full bg-blue-400 h-6");
-			attr(nav, "class", "bg-gray-800");
-			attr(div6, "class", "px-4 py-6 sm:px-0");
-			attr(div7, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
+			div = element("div");
+			div.textContent = "404 Not found";
 		},
 		m(target, anchor) {
-			insert(target, header, anchor);
-			insert(target, t0, anchor);
-			insert(target, div8, anchor);
-			append(div8, nav);
-			append(div8, t11);
-			append(div8, main);
-			append(main, div7);
-			append(div7, div6);
-			mount_component(dags_1, div6, null);
+			insert(target, div, anchor);
+		},
+		p: noop,
+		i: noop,
+		o: noop,
+		d(detaching) {
+			if (detaching) detach(div);
+		}
+	};
+}
+
+// (79:40) 
+function create_if_block_1(ctx) {
+	let dag;
+	let current;
+	dag = new Dag({ props: { router: /*router*/ ctx[1] } });
+
+	return {
+		c() {
+			create_component(dag.$$.fragment);
+		},
+		m(target, anchor) {
+			mount_component(dag, target, anchor);
 			current = true;
 		},
-		p(ctx, [dirty]) {
-			const dags_1_changes = {};
-			if (dirty & /*dags*/ 1) dags_1_changes.dags = /*dags*/ ctx[0];
-			dags_1.$set(dags_1_changes);
+		p: noop,
+		i(local) {
+			if (current) return;
+			transition_in(dag.$$.fragment, local);
+			current = true;
 		},
+		o(local) {
+			transition_out(dag.$$.fragment, local);
+			current = false;
+		},
+		d(detaching) {
+			destroy_component(dag, detaching);
+		}
+	};
+}
+
+// (77:10) {#if $page == 'home'}
+function create_if_block(ctx) {
+	let dags_1;
+	let current;
+	dags_1 = new Dags({ props: { router: /*router*/ ctx[1] } });
+
+	return {
+		c() {
+			create_component(dags_1.$$.fragment);
+		},
+		m(target, anchor) {
+			mount_component(dags_1, target, anchor);
+			current = true;
+		},
+		p: noop,
 		i(local) {
 			if (current) return;
 			transition_in(dags_1.$$.fragment, local);
@@ -90,20 +105,205 @@ function create_fragment(ctx) {
 			current = false;
 		},
 		d(detaching) {
+			destroy_component(dags_1, detaching);
+		}
+	};
+}
+
+function create_fragment(ctx) {
+	let header;
+	let t0;
+	let div8;
+	let nav;
+	let div5;
+	let div4;
+	let div3;
+	let div0;
+	let t1;
+	let div2;
+	let div1;
+	let a0;
+	let t3;
+	let a1;
+	let t5;
+	let a2;
+	let t7;
+	let a3;
+	let t9;
+	let a4;
+	let t11;
+	let main;
+	let div7;
+	let div6;
+	let current_block_type_index;
+	let if_block;
+	let current;
+	let mounted;
+	let dispose;
+	const if_block_creators = [create_if_block, create_if_block_1, create_else_block];
+	const if_blocks = [];
+
+	function select_block_type(ctx, dirty) {
+		if (/*$page*/ ctx[0] == "home") return 0;
+		if (/*$page*/ ctx[0] == "view_dag") return 1;
+		return 2;
+	}
+
+	current_block_type_index = select_block_type(ctx, -1);
+	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+	return {
+		c() {
+			header = element("header");
+			t0 = space();
+			div8 = element("div");
+			nav = element("nav");
+			div5 = element("div");
+			div4 = element("div");
+			div3 = element("div");
+			div0 = element("div");
+			div0.innerHTML = `<img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow"/>`;
+			t1 = space();
+			div2 = element("div");
+			div1 = element("div");
+			a0 = element("a");
+			a0.textContent = "Dags";
+			t3 = space();
+			a1 = element("a");
+			a1.textContent = "Placeholder";
+			t5 = space();
+			a2 = element("a");
+			a2.textContent = "Placeholder";
+			t7 = space();
+			a3 = element("a");
+			a3.textContent = "Placeholder";
+			t9 = space();
+			a4 = element("a");
+			a4.textContent = "Placeholder";
+			t11 = space();
+			main = element("main");
+			div7 = element("div");
+			div6 = element("div");
+			if_block.c();
+			attr(header, "class", "h-full bg-blue-400 h-6");
+			attr(div0, "class", "flex-shrink-0");
+			attr(a0, "href", "#");
+			attr(a0, "class", "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium");
+			attr(a1, "href", "#");
+			attr(a1, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
+			attr(a2, "href", "#");
+			attr(a2, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
+			attr(a3, "href", "#");
+			attr(a3, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
+			attr(a4, "href", "#");
+			attr(a4, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
+			attr(div1, "class", "ml-10 flex items-baseline space-x-4");
+			attr(div2, "class", "hidden md:block");
+			attr(div3, "class", "flex items-center");
+			attr(div4, "class", "flex items-center justify-between h-16");
+			attr(div5, "class", "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8");
+			attr(nav, "class", "bg-gray-800");
+			attr(div6, "class", "px-4 py-6 sm:px-0");
+			attr(div7, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
+		},
+		m(target, anchor) {
+			insert(target, header, anchor);
+			insert(target, t0, anchor);
+			insert(target, div8, anchor);
+			append(div8, nav);
+			append(nav, div5);
+			append(div5, div4);
+			append(div4, div3);
+			append(div3, div0);
+			append(div3, t1);
+			append(div3, div2);
+			append(div2, div1);
+			append(div1, a0);
+			append(div1, t3);
+			append(div1, a1);
+			append(div1, t5);
+			append(div1, a2);
+			append(div1, t7);
+			append(div1, a3);
+			append(div1, t9);
+			append(div1, a4);
+			append(div8, t11);
+			append(div8, main);
+			append(main, div7);
+			append(div7, div6);
+			if_blocks[current_block_type_index].m(div6, null);
+			current = true;
+
+			if (!mounted) {
+				dispose = listen(a0, "click", /*click_handler*/ ctx[2]);
+				mounted = true;
+			}
+		},
+		p(ctx, [dirty]) {
+			let previous_block_index = current_block_type_index;
+			current_block_type_index = select_block_type(ctx, dirty);
+
+			if (current_block_type_index === previous_block_index) {
+				if_blocks[current_block_type_index].p(ctx, dirty);
+			} else {
+				group_outros();
+
+				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+					if_blocks[previous_block_index] = null;
+				});
+
+				check_outros();
+				if_block = if_blocks[current_block_type_index];
+
+				if (!if_block) {
+					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+					if_block.c();
+				} else {
+					if_block.p(ctx, dirty);
+				}
+
+				transition_in(if_block, 1);
+				if_block.m(div6, null);
+			}
+		},
+		i(local) {
+			if (current) return;
+			transition_in(if_block);
+			current = true;
+		},
+		o(local) {
+			transition_out(if_block);
+			current = false;
+		},
+		d(detaching) {
 			if (detaching) detach(header);
 			if (detaching) detach(t0);
 			if (detaching) detach(div8);
-			destroy_component(dags_1);
+			if_blocks[current_block_type_index].d();
+			mounted = false;
+			dispose();
 		}
 	};
 }
 
 function instance($$self, $$props, $$invalidate) {
-	let dags;
+	let $page;
+	let $dag_id;
+	component_subscribe($$self, page, $$value => $$invalidate(0, $page = $$value));
+	component_subscribe($$self, dag_id, $$value => $$invalidate(4, $dag_id = $$value));
 	let sid;
-	let page;
+	let router = navaid();
 
 	onMount(() => {
+		router.on("/", () => {
+			page.set("home");
+		}).on("/dags/:dag_id", params => {
+			page.set("view_dag");
+			dag_id.set(params.dag_id);
+			console.log($page, $dag_id);
+		});
+
+		router.listen();
 		const socket = new WebSocket(`${import.meta.env.SNOWPACK_PUBLIC_SOCKET_URL}/ws`);
 
 		socket.addEventListener("open", function (event) {
@@ -118,7 +318,7 @@ function instance($$self, $$props, $$invalidate) {
 					sid = message.sid;
 					break;
 				case "dags":
-					$$invalidate(0, dags = message.dags);
+					dags.set(message.dags);
 					break;
 				case "update":
 					console.log(message);
@@ -127,7 +327,8 @@ function instance($$self, $$props, $$invalidate) {
 		});
 	});
 
-	return [dags];
+	const click_handler = () => router.route("/", true);
+	return [$page, router, click_handler];
 }
 
 class App extends SvelteComponent {

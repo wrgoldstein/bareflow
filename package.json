@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "env-cmd": "^10.1.0",
+    "navaid": "^1.2.0",
     "svelte": "^3.31.2",
     "tailwindcss": "^2.0.2"
   }

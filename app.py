@@ -14,6 +14,17 @@ app.static('/public', './build')
 async def index(request):
     return await response.file('build/index.html')
 
+@app.route("/<route>")
+async def index_with_route(request, route):
+    # spa resource index
+    return await response.file('build/index.html')
+
+@app.route("/<route>/<id>")
+async def index_with_route(request, route, id):
+    # spa resource view
+    #TODO this is a mega mega hack to have an SPA :lol:
+    return await response.file('build/index.html')
+
 @app.route("/dags")
 async def dags(request): 
     return response.json({"dags": []}) 
@@ -21,7 +32,6 @@ async def dags(request):
 @app.route("/run")
 async def run(request): 
     return response.text("ok")
-
 
 clients = {}
 

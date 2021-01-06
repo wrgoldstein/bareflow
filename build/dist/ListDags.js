@@ -4,6 +4,7 @@ import {
 	append,
 	attr,
 	check_outros,
+	component_subscribe,
 	create_component,
 	destroy_component,
 	destroy_each,
@@ -20,18 +21,25 @@ import {
 } from "../web_modules/svelte/internal.js";
 
 import Dag from "./ListItemDag.js";
+import { dags } from "./stores.js";
 
 function get_each_context(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[1] = list[i];
+	child_ctx[2] = list[i];
 	return child_ctx;
 }
 
-// (32:12) {#each dags || [] as dag}
+// (33:12) {#each $dags || [] as dag}
 function create_each_block(ctx) {
 	let dag;
 	let current;
-	dag = new Dag({ props: { dag: /*dag*/ ctx[1] } });
+
+	dag = new Dag({
+			props: {
+				dag: /*dag*/ ctx[2],
+				router: /*router*/ ctx[0]
+			}
+		});
 
 	return {
 		c() {
@@ -43,7 +51,8 @@ function create_each_block(ctx) {
 		},
 		p(ctx, dirty) {
 			const dag_changes = {};
-			if (dirty & /*dags*/ 1) dag_changes.dag = /*dag*/ ctx[1];
+			if (dirty & /*$dags*/ 2) dag_changes.dag = /*dag*/ ctx[2];
+			if (dirty & /*router*/ 1) dag_changes.router = /*router*/ ctx[0];
 			dag.$set(dag_changes);
 		},
 		i(local) {
@@ -71,7 +80,7 @@ function create_fragment(ctx) {
 	let t9;
 	let tbody;
 	let current;
-	let each_value = /*dags*/ ctx[0] || [];
+	let each_value = /*$dags*/ ctx[1] || [];
 	let each_blocks = [];
 
 	for (let i = 0; i < each_value.length; i += 1) {
@@ -129,8 +138,8 @@ function create_fragment(ctx) {
 			current = true;
 		},
 		p(ctx, [dirty]) {
-			if (dirty & /*dags*/ 1) {
-				each_value = /*dags*/ ctx[0] || [];
+			if (dirty & /*$dags, router*/ 3) {
+				each_value = /*$dags*/ ctx[1] || [];
 				let i;
 
 				for (i = 0; i < each_value.length; i += 1) {
@@ -182,19 +191,21 @@ function create_fragment(ctx) {
 }
 
 function instance($$self, $$props, $$invalidate) {
-	let { dags } = $$props;
+	let $dags;
+	component_subscribe($$self, dags, $$value => $$invalidate(1, $dags = $$value));
+	let { router } = $$props;
 
 	$$self.$$set = $$props => {
-		if ("dags" in $$props) $$invalidate(0, dags = $$props.dags);
+		if ("router" in $$props) $$invalidate(0, router = $$props.router);
 	};
 
-	return [dags];
+	return [router, $dags];
 }
 
 class ListDags extends SvelteComponent {
 	constructor(options) {
 		super();
-		init(this, options, instance, create_fragment, safe_not_equal, { dags: 0 });
+		init(this, options, instance, create_fragment, safe_not_equal, { router: 0 });
 	}
 }
 
