@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "build:local:watch": "env-cmd -f .env snowpack build --watch"
+  },
+  "devDependencies": {
+    "@snowpack/plugin-svelte": "^3.4.1",
+    "snowpack": "^2.18.4"
+  },
+  "dependencies": {
+    "env-cmd": "^10.1.0",
+    "svelte": "^3.31.2",
+    "tailwindcss": "^2.0.2"
+  }
+}
