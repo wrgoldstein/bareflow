@@ -1,0 +1,11 @@
+Built a substantial part of a UI
+Can run a job on k8s
+Can stream a fake "log" to the /dag/id page
+
+todos:
+* stream the actual stdout of a k8s pod to the view page instead
+* introduce a concept of multiple runs
+* introduce a scheduler
+* introduce a database
+* optional use s3 for logs
+* 

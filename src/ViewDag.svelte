@@ -1,7 +1,32 @@
 <script>
-  import { dag, dags, dag_id } from "./stores.js"
+  import { dag, dag_id } from "./stores.js"
 
   export let router
+
+  let pod
+  let logs = ""
+  let uint8array = new TextDecoder("utf-8")
+
+  const runDag = async () => {
+    // todo have some sort of ui state that shows its running
+    const res = await fetch(`/run/${$dag_id}`, { method: "POST" })
+    const body = await res.json()
+    pod = body.pod_name
+    // to get to a POC just storing the current pod run after a triggered run
+    // no history yet
+    showLogs()
+  }
+
+  const showLogs = async () => {
+    logs = ""
+    const response = await fetch(`/api/logs/${pod}`)
+    const reader = response.body.getReader()
+    while (true){
+      const { value, done } = await reader.read();
+      logs += uint8array.decode(value) + "\n"
+      if (done) break;
+    }
+  }
 </script>
 
 {#if $dag}
@@ -50,7 +75,7 @@
         </span>
 
         <span class="sm:ml-3">
-          <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <button on:click={runDag} type="button" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <!-- Heroicon name: check -->
             <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -68,22 +93,21 @@
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
           </button>
-
-          <!--
-            Dropdown panel, show/hide based on dropdown state.
-
-            Entering: "transition ease-out duration-200"
-              From: "transform opacity-0 scale-95"
-              To: "transform opacity-100 scale-100"
-            Leaving: "transition ease-in duration-75"
-              From: "transform opacity-100 scale-100"
-              To: "transform opacity-0 scale-95"
-          -->
-          <div class="origin-top-right absolute right-0 mt-2 -mr-1 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5" aria-labelledby="mobile-menu" role="menu">
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">View</a>
-          </div>
         </span>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <div class="flex mb-4">
+        <span class="sm:ml-3">
+          {#if pod}
+            Running on pod <span class="p-1 rounded bg-blue-200">{pod}</span>
+          {/if}
+        </span>
+      </div>
+      <pre class="whitespace-pre-wrap">
+        {logs}
+      </pre>
     </div>
   </div>
 {:else}

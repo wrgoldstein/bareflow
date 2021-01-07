@@ -29,7 +29,7 @@ function get_each_context(ctx, list, i) {
 	return child_ctx;
 }
 
-// (33:12) {#each $dags || [] as dag}
+// (33:12) {#each Object.values($dags) || [] as dag}
 function create_each_block(ctx) {
 	let dag;
 	let current;
@@ -80,7 +80,7 @@ function create_fragment(ctx) {
 	let t9;
 	let tbody;
 	let current;
-	let each_value = /*$dags*/ ctx[1] || [];
+	let each_value = Object.values(/*$dags*/ ctx[1]) || [];
 	let each_blocks = [];
 
 	for (let i = 0; i < each_value.length; i += 1) {
@@ -138,8 +138,8 @@ function create_fragment(ctx) {
 			current = true;
 		},
 		p(ctx, [dirty]) {
-			if (dirty & /*$dags, router*/ 3) {
-				each_value = /*$dags*/ ctx[1] || [];
+			if (dirty & /*Object, $dags, router*/ 3) {
+				each_value = Object.values(/*$dags*/ ctx[1]) || [];
 				let i;
 
 				for (i = 0; i < each_value.length; i += 1) {

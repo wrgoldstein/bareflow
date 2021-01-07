@@ -10,19 +10,13 @@ jobs = {}
 
 # a simple way to register a job
 def job(*, name, image, command, schedule):
-    params = dict(
+    jobs[name] = dict(
         name=name,
         image=image,
         command=command,
         schedule=schedule,
         schedule_words=get_description(schedule)
     )
-    
-    filtered = ['schedule', 'schedule_words']
-    jobs[name] = {
-        "job": create_job_object(**{k:v for k,v in params.items() if k not in filtered}),
-        "details": params
-    }
 
 
 def create_job_object(**params):

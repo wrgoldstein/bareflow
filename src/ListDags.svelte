@@ -30,7 +30,7 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            {#each $dags || [] as dag}
+            {#each Object.values($dags) || [] as dag}
               <Dag {dag} {router}/>
             {/each}
           </tbody>

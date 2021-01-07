@@ -9,6 +9,7 @@ import {
 	empty,
 	init,
 	insert,
+	listen,
 	noop,
 	safe_not_equal,
 	set_data,
@@ -17,7 +18,7 @@ import {
 	text
 } from "../web_modules/svelte/internal.js";
 
-import { dag, dags, dag_id } from "./stores.js";
+import { dag, dag_id } from "./stores.js";
 
 function create_else_block(ctx) {
 	let t;
@@ -36,9 +37,9 @@ function create_else_block(ctx) {
 	};
 }
 
-// (7:0) {#if $dag}
+// (32:0) {#if $dag}
 function create_if_block(ctx) {
-	let div6;
+	let div5;
 	let div3;
 	let h2;
 	let t0;
@@ -48,24 +49,43 @@ function create_if_block(ctx) {
 	let svg0;
 	let path0;
 	let t2;
-	let t3_value = /*$dag*/ ctx[0].schedule + "";
+	let t3_value = /*$dag*/ ctx[3].schedule + "";
 	let t3;
 	let t4;
 	let div1;
 	let svg1;
 	let path1;
 	let t5;
-	let t6_value = /*$dag*/ ctx[0].image + "";
+	let t6_value = /*$dag*/ ctx[3].image + "";
 	let t6;
 	let t7;
-	let div5;
+	let div4;
+	let span0;
+	let t9;
+	let span1;
+	let t11;
+	let span2;
+	let button2;
+	let t13;
+	let span3;
+	let t15;
+	let div8;
+	let div7;
+	let div6;
+	let span4;
+	let t16;
+	let pre;
+	let t17;
+	let mounted;
+	let dispose;
+	let if_block = /*pod*/ ctx[0] && create_if_block_1(ctx);
 
 	return {
 		c() {
-			div6 = element("div");
+			div5 = element("div");
 			div3 = element("div");
 			h2 = element("h2");
-			t0 = text(/*$dag_id*/ ctx[1]);
+			t0 = text(/*$dag_id*/ ctx[2]);
 			t1 = space();
 			div2 = element("div");
 			div0 = element("div");
@@ -80,26 +100,41 @@ function create_if_block(ctx) {
 			t5 = space();
 			t6 = text(t6_value);
 			t7 = space();
-			div5 = element("div");
+			div4 = element("div");
+			span0 = element("span");
 
-			div5.innerHTML = `<span class="hidden sm:block"><button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"><svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
-            Edit</button></span> 
+			span0.innerHTML = `<button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"><svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
+            Edit</button>`;
 
-        <span class="hidden sm:block ml-3"><button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"><svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"></path></svg>
-            View</button></span> 
+			t9 = space();
+			span1 = element("span");
 
-        <span class="sm:ml-3"><button type="button" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"><svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-            Run</button></span> 
+			span1.innerHTML = `<button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"><svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"></path></svg>
+            View</button>`;
 
-        
-        <span class="ml-3 relative sm:hidden"><button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="mobile-menu" aria-haspopup="true">More
+			t11 = space();
+			span2 = element("span");
+			button2 = element("button");
+
+			button2.innerHTML = `<svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+            Run`;
+
+			t13 = space();
+			span3 = element("span");
+
+			span3.innerHTML = `<button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="mobile-menu" aria-haspopup="true">More
             
-            <svg class="-mr-1 ml-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button> 
+            <svg class="-mr-1 ml-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button>`;
 
-          
-          <div class="origin-top-right absolute right-0 mt-2 -mr-1 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5" aria-labelledby="mobile-menu" role="menu"><a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a> 
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">View</a></div></span>`;
-
+			t15 = space();
+			div8 = element("div");
+			div7 = element("div");
+			div6 = element("div");
+			span4 = element("span");
+			if (if_block) if_block.c();
+			t16 = space();
+			pre = element("pre");
+			t17 = text(/*logs*/ ctx[1]);
 			attr(h2, "class", "text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate");
 			attr(path0, "fill-rule", "evenodd");
 			attr(path0, "d", "M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z");
@@ -119,12 +154,23 @@ function create_if_block(ctx) {
 			attr(div1, "class", "mt-2 flex items-center text-sm text-gray-500");
 			attr(div2, "class", "mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6");
 			attr(div3, "class", "flex-1 min-w-0");
-			attr(div5, "class", "mt-5 flex lg:mt-0 lg:ml-4");
-			attr(div6, "class", "lg:flex lg:items-center lg:justify-between");
+			attr(span0, "class", "hidden sm:block");
+			attr(span1, "class", "hidden sm:block ml-3");
+			attr(button2, "type", "button");
+			attr(button2, "class", "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500");
+			attr(span2, "class", "sm:ml-3");
+			attr(span3, "class", "ml-3 relative sm:hidden");
+			attr(div4, "class", "mt-5 flex lg:mt-0 lg:ml-4");
+			attr(div5, "class", "lg:flex lg:items-center lg:justify-between");
+			attr(span4, "class", "sm:ml-3");
+			attr(div6, "class", "flex mb-4");
+			attr(pre, "class", "whitespace-pre-wrap");
+			attr(div7, "class", "px-4 py-6 sm:px-0");
+			attr(div8, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
 		},
 		m(target, anchor) {
-			insert(target, div6, anchor);
-			append(div6, div3);
+			insert(target, div5, anchor);
+			append(div5, div3);
 			append(div3, h2);
 			append(h2, t0);
 			append(div3, t1);
@@ -140,16 +186,86 @@ function create_if_block(ctx) {
 			append(svg1, path1);
 			append(div1, t5);
 			append(div1, t6);
-			append(div6, t7);
-			append(div6, div5);
+			append(div5, t7);
+			append(div5, div4);
+			append(div4, span0);
+			append(div4, t9);
+			append(div4, span1);
+			append(div4, t11);
+			append(div4, span2);
+			append(span2, button2);
+			append(div4, t13);
+			append(div4, span3);
+			insert(target, t15, anchor);
+			insert(target, div8, anchor);
+			append(div8, div7);
+			append(div7, div6);
+			append(div6, span4);
+			if (if_block) if_block.m(span4, null);
+			append(div7, t16);
+			append(div7, pre);
+			append(pre, t17);
+
+			if (!mounted) {
+				dispose = listen(button2, "click", /*runDag*/ ctx[4]);
+				mounted = true;
+			}
 		},
 		p(ctx, dirty) {
-			if (dirty & /*$dag_id*/ 2) set_data(t0, /*$dag_id*/ ctx[1]);
-			if (dirty & /*$dag*/ 1 && t3_value !== (t3_value = /*$dag*/ ctx[0].schedule + "")) set_data(t3, t3_value);
-			if (dirty & /*$dag*/ 1 && t6_value !== (t6_value = /*$dag*/ ctx[0].image + "")) set_data(t6, t6_value);
+			if (dirty & /*$dag_id*/ 4) set_data(t0, /*$dag_id*/ ctx[2]);
+			if (dirty & /*$dag*/ 8 && t3_value !== (t3_value = /*$dag*/ ctx[3].schedule + "")) set_data(t3, t3_value);
+			if (dirty & /*$dag*/ 8 && t6_value !== (t6_value = /*$dag*/ ctx[3].image + "")) set_data(t6, t6_value);
+
+			if (/*pod*/ ctx[0]) {
+				if (if_block) {
+					if_block.p(ctx, dirty);
+				} else {
+					if_block = create_if_block_1(ctx);
+					if_block.c();
+					if_block.m(span4, null);
+				}
+			} else if (if_block) {
+				if_block.d(1);
+				if_block = null;
+			}
+
+			if (dirty & /*logs*/ 2) set_data(t17, /*logs*/ ctx[1]);
 		},
 		d(detaching) {
-			if (detaching) detach(div6);
+			if (detaching) detach(div5);
+			if (detaching) detach(t15);
+			if (detaching) detach(div8);
+			if (if_block) if_block.d();
+			mounted = false;
+			dispose();
+		}
+	};
+}
+
+// (103:10) {#if pod}
+function create_if_block_1(ctx) {
+	let t0;
+	let span;
+	let t1;
+
+	return {
+		c() {
+			t0 = text("Running on pod ");
+			span = element("span");
+			t1 = text(/*pod*/ ctx[0]);
+			attr(span, "class", "p-1 rounded bg-blue-200");
+		},
+		m(target, anchor) {
+			insert(target, t0, anchor);
+			insert(target, span, anchor);
+			append(span, t1);
+		},
+		p(ctx, dirty) {
+			if (dirty & /*pod*/ 1) set_data(t1, /*pod*/ ctx[0]);
+		},
+		d(detaching) {
+			if (detaching) detach(t0);
+			if (detaching) detach(span);
 		}
 	};
 }
@@ -158,7 +274,7 @@ function create_fragment(ctx) {
 	let if_block_anchor;
 
 	function select_block_type(ctx, dirty) {
-		if (/*$dag*/ ctx[0]) return create_if_block;
+		if (/*$dag*/ ctx[3]) return create_if_block;
 		return create_else_block;
 	}
 
@@ -197,23 +313,50 @@ function create_fragment(ctx) {
 }
 
 function instance($$self, $$props, $$invalidate) {
-	let $dag;
 	let $dag_id;
-	component_subscribe($$self, dag, $$value => $$invalidate(0, $dag = $$value));
-	component_subscribe($$self, dag_id, $$value => $$invalidate(1, $dag_id = $$value));
+	let $dag;
+	component_subscribe($$self, dag_id, $$value => $$invalidate(2, $dag_id = $$value));
+	component_subscribe($$self, dag, $$value => $$invalidate(3, $dag = $$value));
 	let { router } = $$props;
+	let pod;
+	let logs = "";
+	let uint8array = new TextDecoder("utf-8");
 
-	$$self.$$set = $$props => {
-		if ("router" in $$props) $$invalidate(2, router = $$props.router);
+	const runDag = async () => {
+		// todo have some sort of ui state that shows its running
+		const res = await fetch(`/run/${$dag_id}`, { method: "POST" });
+
+		const body = await res.json();
+		$$invalidate(0, pod = body.pod_name);
+
+		// to get to a POC just storing the current pod run after a triggered run
+		// no history yet
+		showLogs();
 	};
 
-	return [$dag, $dag_id, router];
+	const showLogs = async () => {
+		$$invalidate(1, logs = "");
+		const response = await fetch(`/api/logs/${pod}`);
+		const reader = response.body.getReader();
+
+		while (true) {
+			const { value, done } = await reader.read();
+			$$invalidate(1, logs += uint8array.decode(value) + "\n");
+			if (done) break;
+		}
+	};
+
+	$$self.$$set = $$props => {
+		if ("router" in $$props) $$invalidate(5, router = $$props.router);
+	};
+
+	return [pod, logs, $dag_id, $dag, runDag, router];
 }
 
 class ViewDag extends SvelteComponent {
 	constructor(options) {
 		super();
-		init(this, options, instance, create_fragment, safe_not_equal, { router: 2 });
+		init(this, options, instance, create_fragment, safe_not_equal, { router: 5 });
 	}
 }
 

@@ -1,37 +1,56 @@
-import uuid
+import asyncio
 import json
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+
+from aiofile import async_open
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
+from websockets.exceptions import ConnectionClosed
 
 import service
+from flow import create_job_object
 
 app = Sanic("bare_flow")
-
 app.static('/public', './build')
-
 
 @app.route("/")
 async def index(request):
     return await response.file('build/index.html')
 
-@app.route("/<route>")
-async def index_with_route(request, route):
-    # spa resource index
+
+@app.route("/dags/<dag>")
+async def index_with_route(request, dag):
     return await response.file('build/index.html')
 
-@app.route("/<route>/<id>")
-async def index_with_route(request, route, id):
-    # spa resource view
-    #TODO this is a mega mega hack to have an SPA :lol:
-    return await response.file('build/index.html')
 
-@app.route("/dags")
-async def dags(request): 
-    return response.json({"dags": []}) 
+@app.route("/api/logs/<pod>")
+async def logs(request, pod):
+    async def main(res):
+      async with async_open(f"logs/{pod}", 'r') as afp:
+          while True:
+            line = await afp.readline()
+            if line != "":
+              await res.write(line)
 
-@app.route("/run")
-async def run(request): 
-    return response.text("ok")
+    # obviously this will have to be extended to different task runs
+    return response.stream(main)
+
+@app.route("/run/<dag_id>", methods=["POST"])
+async def run(request, dag_id):
+    definition = service.jobs[dag_id]
+    filtered = ['schedule', 'schedule_words']
+    job = create_job_object(**{k:v for k,v in definition.items() if k not in filtered})
+    pod_name = service.run_job(job)
+
+    # with ThreadPoolExecutor(max_workers=1) as executor:
+    #     executor.submit(service.tail_pod_log, pod_name)
+
+    service.tail_pod_log(pod_name)
+
+    return response.json({
+        "pod_name": pod_name
+    })
 
 clients = {}
 
@@ -45,8 +64,7 @@ async def feed(request, ws):
     await ws.send(json.dumps(data))
 
     # Send initial dag details
-    jobs = [j['details'] for j in service.jobs.values()]
-    await ws.send(json.dumps(dict(type="dags", dags=jobs)))
+    await ws.send(json.dumps(dict(type="dags", dags=service.jobs)))
 
     while True:
         try:

@@ -14,6 +14,7 @@ from pathlib import Path
 from kubernetes import client, config, watch
 from flow import jobs
 
+
 paths = Path('dags').glob('*.py')  #TODO nested
 for path in paths:
     spec = importlib.util.spec_from_file_location(path.stem, path)
@@ -43,11 +44,39 @@ def run_job(job):
     print(f"status: {status}", )
     
     pods = v1.list_namespaced_pod(namespace='default', label_selector='job-name={}'.format(job_name))
-    pod = pods.items[0]  #TODO: don't just naively get the first pod
+    pod = pods.items[0]
+    return pod.metadata.name
+    """
+    really each pod is a "step" in a "flow". 
+    
+    right now, they're equivalent but this is a gargantuan TODO
+    """
+    
+
+def tail_pod_log(pod):
+    # this is a pod.metadata.name
+
+    """
+    Copy the stdout to a local file.
+
+    TODO this doesnt have any way of exiting yet
+    TODO use s3 or something
+    """
 
     running = False
     while not running:  #TODO timeout
-        running = v1.read_namespaced_pod_status(namespace="default", name=pod.metadata.name).status.phase == "Running"
+        phase = v1.read_namespaced_pod_status(namespace="default", name=pod).status.phase
+        running = phase == "Running"
 
-    for e in watcher.stream(v1.read_namespaced_pod_log, name=pod.metadata.name, namespace="default"):
-        print(e)
+    import sys
+    _stdout = sys.stdout
+    sys.stdout = open(f"logs/{pod}", "w+")
+
+    for e in watcher.stream(v1.read_namespaced_pod_log, name=pod, namespace="default"):
+        print(e, flush=True)
+    
+    sys.stdout = _stdout
+
+if __name__ == "__main__":
+    job = jobs['my-perl-pi-dag']
+    run_job(job)
