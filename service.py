@@ -71,7 +71,7 @@ def tail_pod_log(pod):
 
     import sys
     _stdout = sys.stdout
-    sys.stdout = open(f"logs/{pod}", "w+")
+    sys.stdout = open(f"pod-logs/{pod}", "w+")
 
     for e in watcher.stream(v1.read_namespaced_pod_log, name=pod, namespace="default"):
         print(e, flush=True)
