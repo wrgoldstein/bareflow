@@ -3,6 +3,7 @@ import {
 	SvelteComponent,
 	append,
 	attr,
+	destroy_each,
 	detach,
 	element,
 	init,
@@ -14,6 +15,31 @@ import {
 	space,
 	text
 } from "../web_modules/svelte/internal.js";
+
+function get_each_context(ctx, list, i) {
+	const child_ctx = ctx.slice();
+	child_ctx[3] = list[i];
+	return child_ctx;
+}
+
+// (30:4) {#each [1,2,3,4,5] as i}
+function create_each_block(ctx) {
+	let t_value = (Math.random() > 0.4 ? "🍏" : "🍎") + "";
+	let t;
+
+	return {
+		c() {
+			t = text(t_value);
+		},
+		m(target, anchor) {
+			insert(target, t, anchor);
+		},
+		p: noop,
+		d(detaching) {
+			if (detaching) detach(t);
+		}
+	};
+}
 
 function create_fragment(ctx) {
 	let tr;
@@ -38,11 +64,17 @@ function create_fragment(ctx) {
 	let td2;
 	let t8;
 	let td3;
-	let t10;
+	let t9;
 	let td4;
 	let a;
 	let mounted;
 	let dispose;
+	let each_value = [1, 2, 3, 4, 5];
+	let each_blocks = [];
+
+	for (let i = 0; i < 5; i += 1) {
+		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+	}
 
 	return {
 		c() {
@@ -66,8 +98,12 @@ function create_fragment(ctx) {
 			td2.innerHTML = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>`;
 			t8 = space();
 			td3 = element("td");
-			td3.textContent = "🍏🍎🍎🍏🍏🍏🍏";
-			t10 = space();
+
+			for (let i = 0; i < 5; i += 1) {
+				each_blocks[i].c();
+			}
+
+			t9 = space();
 			td4 = element("td");
 			a = element("a");
 			a.textContent = "View";
@@ -104,7 +140,12 @@ function create_fragment(ctx) {
 			append(tr, td2);
 			append(tr, t8);
 			append(tr, td3);
-			append(tr, t10);
+
+			for (let i = 0; i < 5; i += 1) {
+				each_blocks[i].m(td3, null);
+			}
+
+			append(tr, t9);
 			append(tr, td4);
 			append(td4, a);
 
@@ -117,11 +158,33 @@ function create_fragment(ctx) {
 			if (dirty & /*dag*/ 1 && t0_value !== (t0_value = /*dag*/ ctx[0].name + "")) set_data(t0, t0_value);
 			if (dirty & /*dag*/ 1 && t3_value !== (t3_value = /*dag*/ ctx[0].schedule + "")) set_data(t3, t3_value);
 			if (dirty & /*dag*/ 1 && t5_value !== (t5_value = /*dag*/ ctx[0].schedule_words + "")) set_data(t5, t5_value);
+
+			if (dirty & /*Math*/ 0) {
+				each_value = [1, 2, 3, 4, 5];
+				let i;
+
+				for (i = 0; i < 5; i += 1) {
+					const child_ctx = get_each_context(ctx, each_value, i);
+
+					if (each_blocks[i]) {
+						each_blocks[i].p(child_ctx, dirty);
+					} else {
+						each_blocks[i] = create_each_block(child_ctx);
+						each_blocks[i].c();
+						each_blocks[i].m(td3, null);
+					}
+				}
+
+				for (; i < 5; i += 1) {
+					each_blocks[i].d(1);
+				}
+			}
 		},
 		i: noop,
 		o: noop,
 		d(detaching) {
 			if (detaching) detach(tr);
+			destroy_each(each_blocks, detaching);
 			mounted = false;
 			dispose();
 		}

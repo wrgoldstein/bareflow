@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 
 from kubernetes import client, config, watch
-from flow import jobs
+from flow import jobs, create_job_object
 
 
 paths = Path('dags').glob('*.py')  #TODO nested
@@ -66,7 +66,8 @@ def tail_pod_log(pod):
     running = False
     while not running:  #TODO timeout
         phase = v1.read_namespaced_pod_status(namespace="default", name=pod).status.phase
-        running = phase == "Running"
+        # all phases
+        running = phase in ["Running", "Succeeded", "Failed", "Unknown"]
 
     import sys
     _stdout = sys.stdout
@@ -78,5 +79,6 @@ def tail_pod_log(pod):
     sys.stdout = _stdout
 
 if __name__ == "__main__":
-    job = jobs['my-perl-pi-dag']
-    run_job(job)
+    job = create_job_object(jobs['whalesay'])
+    pod = run_job(job)
+    tail_pod_log(pod)

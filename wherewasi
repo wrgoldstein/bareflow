@@ -9,3 +9,5 @@ todos:
 * introduce a database
 * optional use s3 for logs
 * 
+
+* use pebble to make sure log tailing is cancellable

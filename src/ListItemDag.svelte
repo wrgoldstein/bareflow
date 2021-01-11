@@ -27,7 +27,9 @@
   </td>
   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
     <!-- placeholder -->
-    🍏🍎🍎🍏🍏🍏🍏
+    {#each [1,2,3,4,5] as i}
+      {Math.random() > .4 ? '🍏' : '🍎'}
+    {/each} 
   </td>
   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
     <a on:click={() => router.route(`/dags/${dag.name}`, true)} class="text-indigo-600 hover:text-indigo-900">View</a>

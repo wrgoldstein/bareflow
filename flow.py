@@ -18,8 +18,12 @@ def job(*, name, image, command, schedule):
         schedule_words=get_description(schedule)
     )
 
+def k8s_job_params(params):
+    filtered = ['schedule', 'schedule_words']
+    return {k:v for k,v in params.items() if k not in filtered}
 
-def create_job_object(**params):
+def create_job_object(params):
+    params = k8s_job_params(params)
     # Configureate Pod template container
     unique_name = f"{params['name']}-{uuid.uuid4().hex[:6]}"
     container = client.V1Container(**params)

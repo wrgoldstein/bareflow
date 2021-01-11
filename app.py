@@ -38,9 +38,7 @@ async def logs(request, pod):
 
 @app.route("/run/<dag_id>", methods=["POST"])
 async def run(request, dag_id):
-    definition = service.jobs[dag_id]
-    filtered = ['schedule', 'schedule_words']
-    job = create_job_object(**{k:v for k,v in definition.items() if k not in filtered})
+    job = create_job_object(service.jobs[dag_id])
     pod_name = service.run_job(job)
 
     # with ThreadPoolExecutor(max_workers=1) as executor:
