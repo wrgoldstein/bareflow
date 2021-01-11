@@ -27,7 +27,7 @@ async def index_with_route(request, dag):
 @app.route("/api/logs/<pod>")
 async def logs(request, pod):
     async def main(res):
-      async with async_open(f"logs/{pod}", 'r') as afp:
+      async with async_open(f"pod-logs/{pod}", 'r') as afp:
           while True:
             line = await afp.readline()
             if line != "":
