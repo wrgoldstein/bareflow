@@ -15,10 +15,11 @@ from contextlib import contextmanager
 from kubernetes import client, config, watch
 import graphql
 from flow import flows
+from datetime import datetime, timezone
 
 
 # Load all dags.. this should be more dynamical
-paths = Path('dags').glob('*.py')  #TODO nested
+paths = Path('flows').glob('*.py')  #TODO nested
 for path in paths:
     spec = importlib.util.spec_from_file_location(path.stem, path)
     mod = importlib.util.module_from_spec(spec)
@@ -88,7 +89,7 @@ async def run_step(step):
             namespace="default"
     )
     pod = await get_pod_for_job(job)
-    graphql.update_flow_run_step(flow_run_step_id, status="started")
+    graphql.update_flow_run_step(flow_run_step_id, status="started", started_at=datetime.now(timezone.utc))
 
     # Wait for pod to leave the Pending state to begin tailing the log
     status = await wait_for_pod_status(pod, ["Succeeded", "Failed", "Unknown", "Running"])
@@ -100,7 +101,8 @@ async def run_step(step):
 
     # wait for the pod to finish before terminating the log tailing subprocess
     status = await wait_for_pod_status(pod, ["Succeeded", "Failed", "Unknown"])
-    graphql.update_flow_run_step(flow_run_step_id, status=status.lower())
+
+    graphql.update_flow_run_step(flow_run_step_id, status=status.lower(), ended_at=datetime.now(timezone.utc))
     
     log.terminate()
 

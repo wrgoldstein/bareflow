@@ -18,8 +18,8 @@ async def index(request):
     return await response.file('build/index.html')
 
 
-@app.route("/dags/<dag>")
-async def index_with_route(request, dag):
+@app.route("/flows/<flow>")
+async def index_with_route(request, flow):
     return await response.file('build/index.html')
 
 
@@ -58,8 +58,8 @@ async def feed(request, ws):
     data = dict(type="sid", sid=_id)
     await ws.send(json.dumps(data))
 
-    # Send initial dag details
-    await ws.send(json.dumps(dict(type="dags", dags=service.flows)))
+    # Send initial flow details
+    await ws.send(json.dumps(dict(type="flows", flows=service.flows)))
 
 
 if __name__ == "__main__":

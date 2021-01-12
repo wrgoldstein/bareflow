@@ -1,5 +1,6 @@
 <script>
-  export let dag, router
+  export let flow, router
+  const [ flow_id, steps ] = flow
 </script>
 
 <tr>
@@ -7,7 +8,7 @@
     <div class="flex items-center">
       <div class="ml-4">
         <div class="text-sm font-medium text-gray-900">
-          {dag.name}
+          {flow_id}
         </div>
         <div class="text-sm text-gray-500">
           
@@ -16,8 +17,8 @@
     </div>
   </td>
   <td class="px-6 py-4 whitespace-nowrap">
-    <div class="text-sm text-gray-900">{dag.schedule}</div>
-    <div class="text-sm text-gray-500">{dag.schedule_words}</div>
+    <div class="text-sm text-gray-900">schedule will go here</div>
+    <div class="text-sm text-gray-500">human readable schedule</div>
   </td>
   <td class="px-6 py-4 whitespace-nowrap">
     <!-- placeholder -->
@@ -32,6 +33,6 @@
     {/each} 
   </td>
   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    <a on:click={() => router.route(`/dags/${dag.name}`, true)} class="text-indigo-600 hover:text-indigo-900">View</a>
+    <a on:click={() => router.route(`/flows/${flow_id}`, true)} class="text-indigo-600 hover:text-indigo-900">View</a>
   </td>
 </tr>

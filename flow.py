@@ -5,7 +5,7 @@ import inspect
 from kubernetes import client
 from cron_descriptor import get_description
 from collections import defaultdict
-# todo: actual DAG
+
 flows = defaultdict(list)
 
 # a simple way to register a job

@@ -26,9 +26,9 @@ import {
 
 import navaid from "../web_modules/navaid.js";
 import { onMount } from "../web_modules/svelte.js";
-import Dags from "./ListDags.js";
-import Dag from "./ViewDag.js";
-import { dags, page, dag_id } from "./stores.js";
+import FlowIndex from "./FlowIndex.js";
+import FlowView from "./FlowView.js";
+import { flows, page, flow_id } from "./stores.js";
 
 function create_else_block(ctx) {
 	let div;
@@ -50,62 +50,62 @@ function create_else_block(ctx) {
 	};
 }
 
-// (78:40) 
+// (75:41) 
 function create_if_block_1(ctx) {
-	let dag;
+	let flowview;
 	let current;
-	dag = new Dag({ props: { router: /*router*/ ctx[1] } });
+	flowview = new FlowView({ props: { router: /*router*/ ctx[1] } });
 
 	return {
 		c() {
-			create_component(dag.$$.fragment);
+			create_component(flowview.$$.fragment);
 		},
 		m(target, anchor) {
-			mount_component(dag, target, anchor);
+			mount_component(flowview, target, anchor);
 			current = true;
 		},
 		p: noop,
 		i(local) {
 			if (current) return;
-			transition_in(dag.$$.fragment, local);
+			transition_in(flowview.$$.fragment, local);
 			current = true;
 		},
 		o(local) {
-			transition_out(dag.$$.fragment, local);
+			transition_out(flowview.$$.fragment, local);
 			current = false;
 		},
 		d(detaching) {
-			destroy_component(dag, detaching);
+			destroy_component(flowview, detaching);
 		}
 	};
 }
 
-// (76:10) {#if $page == 'home'}
+// (73:10) {#if $page == 'home'}
 function create_if_block(ctx) {
-	let dags_1;
+	let flowindex;
 	let current;
-	dags_1 = new Dags({ props: { router: /*router*/ ctx[1] } });
+	flowindex = new FlowIndex({ props: { router: /*router*/ ctx[1] } });
 
 	return {
 		c() {
-			create_component(dags_1.$$.fragment);
+			create_component(flowindex.$$.fragment);
 		},
 		m(target, anchor) {
-			mount_component(dags_1, target, anchor);
+			mount_component(flowindex, target, anchor);
 			current = true;
 		},
 		p: noop,
 		i(local) {
 			if (current) return;
-			transition_in(dags_1.$$.fragment, local);
+			transition_in(flowindex.$$.fragment, local);
 			current = true;
 		},
 		o(local) {
-			transition_out(dags_1.$$.fragment, local);
+			transition_out(flowindex.$$.fragment, local);
 			current = false;
 		},
 		d(detaching) {
-			destroy_component(dags_1, detaching);
+			destroy_component(flowindex, detaching);
 		}
 	};
 }
@@ -126,12 +126,6 @@ function create_fragment(ctx) {
 	let t3;
 	let a1;
 	let t5;
-	let a2;
-	let t7;
-	let a3;
-	let t9;
-	let a4;
-	let t11;
 	let main;
 	let div7;
 	let div6;
@@ -145,7 +139,7 @@ function create_fragment(ctx) {
 
 	function select_block_type(ctx, dirty) {
 		if (/*$page*/ ctx[0] == "home") return 0;
-		if (/*$page*/ ctx[0] == "view_dag") return 1;
+		if (/*$page*/ ctx[0] == "view_flow") return 1;
 		return 2;
 	}
 
@@ -167,20 +161,11 @@ function create_fragment(ctx) {
 			div2 = element("div");
 			div1 = element("div");
 			a0 = element("a");
-			a0.textContent = "Dags";
+			a0.textContent = "Flows";
 			t3 = space();
 			a1 = element("a");
 			a1.textContent = "Placeholder";
 			t5 = space();
-			a2 = element("a");
-			a2.textContent = "Placeholder";
-			t7 = space();
-			a3 = element("a");
-			a3.textContent = "Placeholder";
-			t9 = space();
-			a4 = element("a");
-			a4.textContent = "Placeholder";
-			t11 = space();
 			main = element("main");
 			div7 = element("div");
 			div6 = element("div");
@@ -191,12 +176,6 @@ function create_fragment(ctx) {
 			attr(a0, "class", "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium");
 			attr(a1, "href", "#");
 			attr(a1, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
-			attr(a2, "href", "#");
-			attr(a2, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
-			attr(a3, "href", "#");
-			attr(a3, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
-			attr(a4, "href", "#");
-			attr(a4, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
 			attr(div1, "class", "ml-10 flex items-baseline space-x-4");
 			attr(div2, "class", "hidden md:block");
 			attr(div3, "class", "flex items-center");
@@ -221,13 +200,7 @@ function create_fragment(ctx) {
 			append(div1, a0);
 			append(div1, t3);
 			append(div1, a1);
-			append(div1, t5);
-			append(div1, a2);
-			append(div1, t7);
-			append(div1, a3);
-			append(div1, t9);
-			append(div1, a4);
-			append(div8, t11);
+			append(div8, t5);
 			append(div8, main);
 			append(main, div7);
 			append(div7, div6);
@@ -295,9 +268,9 @@ function instance($$self, $$props, $$invalidate) {
 	onMount(() => {
 		router.on("/", () => {
 			page.set("home");
-		}).on("/dags/:dag_id", params => {
-			page.set("view_dag");
-			dag_id.set(params.dag_id);
+		}).on("/flows/:flow_id", params => {
+			page.set("view_flow");
+			flow_id.set(params.flow_id);
 		});
 
 		router.listen();
@@ -308,14 +281,16 @@ function instance($$self, $$props, $$invalidate) {
 		});
 
 		socket.addEventListener("message", event => {
+			console.log("hello");
 			const message = JSON.parse(event.data);
 
 			switch (message.type) {
 				case "sid":
 					sid = message.sid;
 					break;
-				case "dags":
-					dags.set(message.dags);
+				case "flows":
+					console.log(message.flows);
+					flows.set(message.flows);
 					break;
 				case "update":
 					console.log(message);

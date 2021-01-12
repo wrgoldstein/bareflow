@@ -1,9 +1,10 @@
 <script>
   import navaid from "navaid"
   import { onMount } from "svelte"
-  import Dags from "./ListDags.svelte"
-  import Dag from "./ViewDag.svelte"
-  import { dags, page, dag_id } from "./stores.js"
+  import FlowIndex from "./FlowIndex.svelte"
+  import FlowView from "./FlowView.svelte"
+
+  import { flows, page, flow_id } from "./stores.js"
 
   let sid
   let router = navaid()
@@ -13,9 +14,9 @@
       .on("/", () => {
         page.set("home")
       })
-      .on("/dags/:dag_id", params => {
-        page.set("view_dag")
-        dag_id.set(params.dag_id)
+      .on("/flows/:flow_id", params => {
+        page.set("view_flow")
+        flow_id.set(params.flow_id)
       })
 
     router.listen()
@@ -28,13 +29,15 @@
     })
 
     socket.addEventListener("message", event => {
+      console.log("hello")
       const message = JSON.parse(event.data)
       switch (message.type) {
         case "sid":
           sid = message.sid
           break
-        case "dags":
-          dags.set(message.dags)
+        case "flows":
+          console.log(message.flows)
+          flows.set(message.flows)
           break
         case "update":
           console.log(message)
@@ -56,13 +59,7 @@
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
               <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
-              <a href="#" on:click={() => router.route("/", true)} class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">Dags</a>
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a>
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a>
-
-              <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a>
+              <a href="#" on:click={() => router.route("/", true)} class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">Flows</a>
 
               <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Placeholder</a>
           </div>
@@ -74,9 +71,9 @@
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div class="px-4 py-6 sm:px-0">
           {#if $page == 'home'}
-            <Dags {router} />
-          {:else if $page == 'view_dag'}
-            <Dag {router} />
+            <FlowIndex {router} />
+          {:else if $page == 'view_flow'}
+            <FlowView {router} />
           {:else}
             <div>404 Not found</div>
           {/if}
