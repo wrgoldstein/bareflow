@@ -37,7 +37,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (32:0) {#if $dag}
+// (30:0) {#if $dag}
 function create_if_block(ctx) {
 	let div5;
 	let div3;
@@ -49,14 +49,14 @@ function create_if_block(ctx) {
 	let svg0;
 	let path0;
 	let t2;
-	let t3_value = /*$dag*/ ctx[3].schedule + "";
+	let t3_value = /*$dag*/ ctx[2].schedule + "";
 	let t3;
 	let t4;
 	let div1;
 	let svg1;
 	let path1;
 	let t5;
-	let t6_value = /*$dag*/ ctx[3].image + "";
+	let t6_value = /*$dag*/ ctx[2].image + "";
 	let t6;
 	let t7;
 	let div4;
@@ -78,14 +78,14 @@ function create_if_block(ctx) {
 	let t17;
 	let mounted;
 	let dispose;
-	let if_block = /*pod*/ ctx[0] && create_if_block_1(ctx);
+	let if_block = /*pod*/ ctx[3] && create_if_block_1(ctx);
 
 	return {
 		c() {
 			div5 = element("div");
 			div3 = element("div");
 			h2 = element("h2");
-			t0 = text(/*$dag_id*/ ctx[2]);
+			t0 = text(/*$dag_id*/ ctx[1]);
 			t1 = space();
 			div2 = element("div");
 			div0 = element("div");
@@ -134,7 +134,7 @@ function create_if_block(ctx) {
 			if (if_block) if_block.c();
 			t16 = space();
 			pre = element("pre");
-			t17 = text(/*logs*/ ctx[1]);
+			t17 = text(/*logs*/ ctx[0]);
 			attr(h2, "class", "text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate");
 			attr(path0, "fill-rule", "evenodd");
 			attr(path0, "d", "M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z");
@@ -212,24 +212,11 @@ function create_if_block(ctx) {
 			}
 		},
 		p(ctx, dirty) {
-			if (dirty & /*$dag_id*/ 4) set_data(t0, /*$dag_id*/ ctx[2]);
-			if (dirty & /*$dag*/ 8 && t3_value !== (t3_value = /*$dag*/ ctx[3].schedule + "")) set_data(t3, t3_value);
-			if (dirty & /*$dag*/ 8 && t6_value !== (t6_value = /*$dag*/ ctx[3].image + "")) set_data(t6, t6_value);
-
-			if (/*pod*/ ctx[0]) {
-				if (if_block) {
-					if_block.p(ctx, dirty);
-				} else {
-					if_block = create_if_block_1(ctx);
-					if_block.c();
-					if_block.m(span4, null);
-				}
-			} else if (if_block) {
-				if_block.d(1);
-				if_block = null;
-			}
-
-			if (dirty & /*logs*/ 2) set_data(t17, /*logs*/ ctx[1]);
+			if (dirty & /*$dag_id*/ 2) set_data(t0, /*$dag_id*/ ctx[1]);
+			if (dirty & /*$dag*/ 4 && t3_value !== (t3_value = /*$dag*/ ctx[2].schedule + "")) set_data(t3, t3_value);
+			if (dirty & /*$dag*/ 4 && t6_value !== (t6_value = /*$dag*/ ctx[2].image + "")) set_data(t6, t6_value);
+			if (/*pod*/ ctx[3]) if_block.p(ctx, dirty);
+			if (dirty & /*logs*/ 1) set_data(t17, /*logs*/ ctx[0]);
 		},
 		d(detaching) {
 			if (detaching) detach(div5);
@@ -242,27 +229,23 @@ function create_if_block(ctx) {
 	};
 }
 
-// (103:10) {#if pod}
+// (101:10) {#if pod}
 function create_if_block_1(ctx) {
 	let t0;
 	let span;
-	let t1;
 
 	return {
 		c() {
 			t0 = text("Running on pod ");
 			span = element("span");
-			t1 = text(/*pod*/ ctx[0]);
+			span.textContent = `${/*pod*/ ctx[3]}`;
 			attr(span, "class", "p-1 rounded bg-blue-200");
 		},
 		m(target, anchor) {
 			insert(target, t0, anchor);
 			insert(target, span, anchor);
-			append(span, t1);
 		},
-		p(ctx, dirty) {
-			if (dirty & /*pod*/ 1) set_data(t1, /*pod*/ ctx[0]);
-		},
+		p: noop,
 		d(detaching) {
 			if (detaching) detach(t0);
 			if (detaching) detach(span);
@@ -274,7 +257,7 @@ function create_fragment(ctx) {
 	let if_block_anchor;
 
 	function select_block_type(ctx, dirty) {
-		if (/*$dag*/ ctx[3]) return create_if_block;
+		if (/*$dag*/ ctx[2]) return create_if_block;
 		return create_else_block;
 	}
 
@@ -315,8 +298,8 @@ function create_fragment(ctx) {
 function instance($$self, $$props, $$invalidate) {
 	let $dag_id;
 	let $dag;
-	component_subscribe($$self, dag_id, $$value => $$invalidate(2, $dag_id = $$value));
-	component_subscribe($$self, dag, $$value => $$invalidate(3, $dag = $$value));
+	component_subscribe($$self, dag_id, $$value => $$invalidate(1, $dag_id = $$value));
+	component_subscribe($$self, dag, $$value => $$invalidate(2, $dag = $$value));
 	let { router } = $$props;
 	let pod;
 	let logs = "";
@@ -326,31 +309,23 @@ function instance($$self, $$props, $$invalidate) {
 		// todo have some sort of ui state that shows its running
 		const res = await fetch(`/run/${$dag_id}`, { method: "POST" });
 
-		const body = await res.json();
-		$$invalidate(0, pod = body.pod_name);
-
 		// to get to a POC just storing the current pod run after a triggered run
 		// no history yet
 		showLogs();
 	};
 
 	const showLogs = async () => {
-		$$invalidate(1, logs = "");
-		const response = await fetch(`/api/logs/${pod}`);
-		const reader = response.body.getReader();
-
-		while (true) {
-			const { value, done } = await reader.read();
-			$$invalidate(1, logs += uint8array.decode(value) + "\n");
-			if (done) break;
-		}
-	};
+		$$invalidate(0, logs = "");
+	}; // const response = await fetch(`/api/logs/${pod}`)
+	// const reader = response.body.getReader()
+	// while (true){
+	//   const { value, done } = await reader.read();
 
 	$$self.$$set = $$props => {
 		if ("router" in $$props) $$invalidate(5, router = $$props.router);
 	};
 
-	return [pod, logs, $dag_id, $dag, runDag, router];
+	return [logs, $dag_id, $dag, pod, runDag, router];
 }
 
 class ViewDag extends SvelteComponent {

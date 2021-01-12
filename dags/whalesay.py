@@ -1,8 +1,9 @@
-from flow import job
+from flow import step
 
-job(
+step(
+    flow_id="whalesay",
     name="whalesay",  # no underscores
     image="docker/whalesay",
     command=["cowsay", "better mortgage so fun"],
-    schedule="0 */2 * * *"
+    # schedule="0 */2 * * *"
 )

@@ -10,8 +10,6 @@
   const runDag = async () => {
     // todo have some sort of ui state that shows its running
     const res = await fetch(`/run/${$dag_id}`, { method: "POST" })
-    const body = await res.json()
-    pod = body.pod_name
     // to get to a POC just storing the current pod run after a triggered run
     // no history yet
     showLogs()
@@ -19,13 +17,13 @@
 
   const showLogs = async () => {
     logs = ""
-    const response = await fetch(`/api/logs/${pod}`)
-    const reader = response.body.getReader()
-    while (true){
-      const { value, done } = await reader.read();
-      logs += uint8array.decode(value) + "\n"
-      if (done) break;
-    }
+    // const response = await fetch(`/api/logs/${pod}`)
+    // const reader = response.body.getReader()
+    // while (true){
+    //   const { value, done } = await reader.read();
+    //   logs += uint8array.decode(value) + "\n"
+    //   if (done) break;
+    // }
   }
 </script>
 
