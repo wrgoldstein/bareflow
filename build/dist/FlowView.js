@@ -38,7 +38,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (34:0) {#if $flow}
+// (33:0) {#if $flow}
 function create_if_block(ctx) {
 	let div5;
 	let div3;
@@ -227,7 +227,7 @@ function create_if_block(ctx) {
 	};
 }
 
-// (94:10) {#if pod}
+// (93:10) {#if pod}
 function create_if_block_1(ctx) {
 	let t0;
 	let span;
@@ -312,7 +312,7 @@ function instance($$self, $$props, $$invalidate) {
 	};
 
 	const view = () => {
-		console.log($flow);
+		
 	};
 
 	const showLogs = async () => {

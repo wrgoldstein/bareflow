@@ -6,17 +6,19 @@
 5. Separate library code from dags
 """
 
-import importlib.util
-import uuid
-from pathlib import Path
 import asyncio
+import importlib.util
 import sys
+import uuid
 from contextlib import contextmanager
-from kubernetes import client, config, watch
-import graphql
-from flow import flows
 from datetime import datetime, timezone
+from pathlib import Path
 
+from kubernetes import client, config, watch
+
+import graphql
+import stats
+from flow import flows
 
 # Load all dags.. this should be more dynamical
 paths = Path('flows').glob('*.py')  #TODO nested
@@ -107,6 +109,16 @@ async def run_step(step):
     log.terminate()
 
 
+def get_stats():
+    """
+    Get recent run stats (success/fail and duration)
+    """
+    run_stats = graphql.get_flow_run_stats()
+    #TODO just dont have time to do this properly
+    return stats.roll_up_stats(run_stats)
+
+    
+
 async def scheduler():
     while True:
         print("Looking for steps to run")
@@ -122,6 +134,8 @@ async def scheduler():
         for step in eligible_flow_run_steps:
             asyncio.create_task(run_step(step))
             graphql.update_flow_run_step(step["id"], status="queued")
+
+            #TODO update the flow run itself (if this is the last step of the run)
 
         #TODO Check if any flows have been scheduled
         await asyncio.sleep(5)

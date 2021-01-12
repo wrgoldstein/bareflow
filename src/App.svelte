@@ -9,7 +9,7 @@
   let sid
   let router = navaid()
 
-  onMount(() => {
+  onMount(async () => {
     router
       .on("/", () => {
         page.set("home")
@@ -29,17 +29,30 @@
     })
 
     socket.addEventListener("message", event => {
-      console.log("hello")
       const message = JSON.parse(event.data)
       switch (message.type) {
         case "sid":
           sid = message.sid
           break
         case "flows":
-          console.log(message.flows)
           flows.set(message.flows)
           break
-        case "update":
+        case "stats":
+
+          // assign the initial stats to their flows
+          for (let _flow_id in message.stats){
+            if (_flow_id in $flows){
+              let temp = $flows[_flow_id]
+              temp["runs"] = message.stats[_flow_id]
+              flows.update(self => {
+                self[_flow_id] = temp
+                return self
+              })
+            }
+          }
+          break
+
+        case "event":
           console.log(message)
           break
       }

@@ -6,24 +6,82 @@ import {
 	destroy_each,
 	detach,
 	element,
+	empty,
 	init,
 	insert,
 	listen,
 	noop,
 	safe_not_equal,
+	set_data,
 	space,
 	text
 } from "../web_modules/svelte/internal.js";
 
 function get_each_context(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[5] = list[i];
+	child_ctx[6] = list[i];
 	return child_ctx;
 }
 
-// (31:4) {#each [1,2,3,4,5] as i}
+// (31:4) {#if runs}
+function create_if_block(ctx) {
+	let each_1_anchor;
+	let each_value = /*runs*/ ctx[2];
+	let each_blocks = [];
+
+	for (let i = 0; i < each_value.length; i += 1) {
+		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+	}
+
+	return {
+		c() {
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				each_blocks[i].c();
+			}
+
+			each_1_anchor = empty();
+		},
+		m(target, anchor) {
+			for (let i = 0; i < each_blocks.length; i += 1) {
+				each_blocks[i].m(target, anchor);
+			}
+
+			insert(target, each_1_anchor, anchor);
+		},
+		p(ctx, dirty) {
+			if (dirty & /*runs*/ 4) {
+				each_value = /*runs*/ ctx[2];
+				let i;
+
+				for (i = 0; i < each_value.length; i += 1) {
+					const child_ctx = get_each_context(ctx, each_value, i);
+
+					if (each_blocks[i]) {
+						each_blocks[i].p(child_ctx, dirty);
+					} else {
+						each_blocks[i] = create_each_block(child_ctx);
+						each_blocks[i].c();
+						each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
+					}
+				}
+
+				for (; i < each_blocks.length; i += 1) {
+					each_blocks[i].d(1);
+				}
+
+				each_blocks.length = each_value.length;
+			}
+		},
+		d(detaching) {
+			destroy_each(each_blocks, detaching);
+			if (detaching) detach(each_1_anchor);
+		}
+	};
+}
+
+// (32:6) {#each runs as run}
 function create_each_block(ctx) {
-	let t_value = (Math.random() > 0.4 ? "🍏" : "🍎") + "";
+	let t_value = (/*run*/ ctx[6].status == "succeeded" ? "🍏" : "🍎") + "";
 	let t;
 
 	return {
@@ -33,7 +91,9 @@ function create_each_block(ctx) {
 		m(target, anchor) {
 			insert(target, t, anchor);
 		},
-		p: noop,
+		p(ctx, dirty) {
+			if (dirty & /*runs*/ 4 && t_value !== (t_value = (/*run*/ ctx[6].status == "succeeded" ? "🍏" : "🍎") + "")) set_data(t, t_value);
+		},
 		d(detaching) {
 			if (detaching) detach(t);
 		}
@@ -46,25 +106,21 @@ function create_fragment(ctx) {
 	let div3;
 	let div2;
 	let div0;
+	let t0;
 	let t1;
 	let div1;
 	let t2;
 	let td1;
-	let t6;
+	let t3;
 	let td2;
-	let t8;
+	let t5;
 	let td3;
-	let t9;
+	let t6;
 	let td4;
 	let a;
 	let mounted;
 	let dispose;
-	let each_value = [1, 2, 3, 4, 5];
-	let each_blocks = [];
-
-	for (let i = 0; i < 5; i += 1) {
-		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-	}
+	let if_block = /*runs*/ ctx[2] && create_if_block(ctx);
 
 	return {
 		c() {
@@ -73,26 +129,18 @@ function create_fragment(ctx) {
 			div3 = element("div");
 			div2 = element("div");
 			div0 = element("div");
-			div0.textContent = `${/*flow_id*/ ctx[1]}`;
+			t0 = text(/*flow_id*/ ctx[1]);
 			t1 = space();
 			div1 = element("div");
 			t2 = space();
 			td1 = element("td");
-
-			td1.innerHTML = `<div class="text-sm text-gray-900">schedule will go here</div> 
-    <div class="text-sm text-gray-500">human readable schedule</div>`;
-
-			t6 = space();
+			t3 = space();
 			td2 = element("td");
 			td2.innerHTML = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>`;
-			t8 = space();
+			t5 = space();
 			td3 = element("td");
-
-			for (let i = 0; i < 5; i += 1) {
-				each_blocks[i].c();
-			}
-
-			t9 = space();
+			if (if_block) if_block.c();
+			t6 = space();
 			td4 = element("td");
 			a = element("a");
 			a.textContent = "View";
@@ -113,55 +161,46 @@ function create_fragment(ctx) {
 			append(td0, div3);
 			append(div3, div2);
 			append(div2, div0);
+			append(div0, t0);
 			append(div2, t1);
 			append(div2, div1);
 			append(tr, t2);
 			append(tr, td1);
-			append(tr, t6);
+			append(tr, t3);
 			append(tr, td2);
-			append(tr, t8);
+			append(tr, t5);
 			append(tr, td3);
-
-			for (let i = 0; i < 5; i += 1) {
-				each_blocks[i].m(td3, null);
-			}
-
-			append(tr, t9);
+			if (if_block) if_block.m(td3, null);
+			append(tr, t6);
 			append(tr, td4);
 			append(td4, a);
 
 			if (!mounted) {
-				dispose = listen(a, "click", /*click_handler*/ ctx[3]);
+				dispose = listen(a, "click", /*click_handler*/ ctx[4]);
 				mounted = true;
 			}
 		},
 		p(ctx, [dirty]) {
-			if (dirty & /*Math*/ 0) {
-				each_value = [1, 2, 3, 4, 5];
-				let i;
+			if (dirty & /*flow_id*/ 2) set_data(t0, /*flow_id*/ ctx[1]);
 
-				for (i = 0; i < 5; i += 1) {
-					const child_ctx = get_each_context(ctx, each_value, i);
-
-					if (each_blocks[i]) {
-						each_blocks[i].p(child_ctx, dirty);
-					} else {
-						each_blocks[i] = create_each_block(child_ctx);
-						each_blocks[i].c();
-						each_blocks[i].m(td3, null);
-					}
+			if (/*runs*/ ctx[2]) {
+				if (if_block) {
+					if_block.p(ctx, dirty);
+				} else {
+					if_block = create_if_block(ctx);
+					if_block.c();
+					if_block.m(td3, null);
 				}
-
-				for (; i < 5; i += 1) {
-					each_blocks[i].d(1);
-				}
+			} else if (if_block) {
+				if_block.d(1);
+				if_block = null;
 			}
 		},
 		i: noop,
 		o: noop,
 		d(detaching) {
 			if (detaching) detach(tr);
-			destroy_each(each_blocks, detaching);
+			if (if_block) if_block.d();
 			mounted = false;
 			dispose();
 		}
@@ -169,22 +208,30 @@ function create_fragment(ctx) {
 }
 
 function instance($$self, $$props, $$invalidate) {
+	let flow_id;
+	let steps;
+	let runs;
 	let { flow } = $$props, { router } = $$props;
-	const [flow_id, steps] = flow;
 	const click_handler = () => router.route(`/flows/${flow_id}`, true);
 
 	$$self.$$set = $$props => {
-		if ("flow" in $$props) $$invalidate(2, flow = $$props.flow);
+		if ("flow" in $$props) $$invalidate(3, flow = $$props.flow);
 		if ("router" in $$props) $$invalidate(0, router = $$props.router);
 	};
 
-	return [router, flow_id, flow, click_handler];
+	$$self.$$.update = () => {
+		if ($$self.$$.dirty & /*flow*/ 8) {
+			$: $$invalidate(1, [flow_id, { steps, runs }] = flow, flow_id, ($$invalidate(2, runs), $$invalidate(3, flow)));
+		}
+	};
+
+	return [router, flow_id, runs, flow, click_handler];
 }
 
 class FlowStub extends SvelteComponent {
 	constructor(options) {
 		super();
-		init(this, options, instance, create_fragment, safe_not_equal, { flow: 2, router: 0 });
+		init(this, options, instance, create_fragment, safe_not_equal, { flow: 3, router: 0 });
 	}
 }
 

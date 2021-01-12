@@ -1,6 +1,6 @@
 <script>
   export let flow, router
-  const [ flow_id, steps ] = flow
+  $: [ flow_id, {steps, runs} ] = flow
 </script>
 
 <tr>
@@ -17,8 +17,8 @@
     </div>
   </td>
   <td class="px-6 py-4 whitespace-nowrap">
-    <div class="text-sm text-gray-900">schedule will go here</div>
-    <div class="text-sm text-gray-500">human readable schedule</div>
+    <!-- <div class="text-sm text-gray-900">schedule will go here</div>
+    <div class="text-sm text-gray-500">human readable schedule</div> -->
   </td>
   <td class="px-6 py-4 whitespace-nowrap">
     <!-- placeholder -->
@@ -28,9 +28,11 @@
   </td>
   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
     <!-- placeholder -->
-    {#each [1,2,3,4,5] as i}
-      {Math.random() > .4 ? '🍏' : '🍎'}
-    {/each} 
+    {#if runs}
+      {#each runs as run}
+        {run.status == "succeeded" ? '🍏' : '🍎' }
+      {/each}
+    {/if}
   </td>
   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
     <a on:click={() => router.route(`/flows/${flow_id}`, true)} class="text-indigo-600 hover:text-indigo-900">View</a>

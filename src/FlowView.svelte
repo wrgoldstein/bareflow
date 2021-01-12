@@ -16,7 +16,6 @@
   }
 
   const view = () => {
-    console.log($flow)
   }
 
   const showLogs = async () => {

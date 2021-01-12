@@ -50,7 +50,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (75:41) 
+// (88:41) 
 function create_if_block_1(ctx) {
 	let flowview;
 	let current;
@@ -80,7 +80,7 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (73:10) {#if $page == 'home'}
+// (86:10) {#if $page == 'home'}
 function create_if_block(ctx) {
 	let flowindex;
 	let current;
@@ -260,12 +260,14 @@ function create_fragment(ctx) {
 }
 
 function instance($$self, $$props, $$invalidate) {
+	let $flows;
 	let $page;
+	component_subscribe($$self, flows, $$value => $$invalidate(4, $flows = $$value));
 	component_subscribe($$self, page, $$value => $$invalidate(0, $page = $$value));
 	let sid;
 	let router = navaid();
 
-	onMount(() => {
+	onMount(async () => {
 		router.on("/", () => {
 			page.set("home");
 		}).on("/flows/:flow_id", params => {
@@ -281,7 +283,6 @@ function instance($$self, $$props, $$invalidate) {
 		});
 
 		socket.addEventListener("message", event => {
-			console.log("hello");
 			const message = JSON.parse(event.data);
 
 			switch (message.type) {
@@ -289,10 +290,23 @@ function instance($$self, $$props, $$invalidate) {
 					sid = message.sid;
 					break;
 				case "flows":
-					console.log(message.flows);
 					flows.set(message.flows);
 					break;
-				case "update":
+				case "stats":
+					// assign the initial stats to their flows
+					for (let _flow_id in message.stats) {
+						if (_flow_id in $flows) {
+							let temp = $flows[_flow_id];
+							temp["runs"] = message.stats[_flow_id];
+
+							flows.update(self => {
+								self[_flow_id] = temp;
+								return self;
+							});
+						}
+					}
+					break;
+				case "event":
 					console.log(message);
 					break;
 			}

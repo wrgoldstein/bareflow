@@ -49,18 +49,27 @@ async def run(request, flow_id):
 
 clients = {}
 
+async def msg(ws, type, **body):
+    await ws.send(json.dumps(dict(type=type, **body)))
+
 @app.websocket("/ws")
 async def feed(request, ws):
     _id = uuid.uuid4().hex
     clients[_id] = ws
 
     # Send the client its socket ID
-    data = dict(type="sid", sid=_id)
-    await ws.send(json.dumps(data))
+    await msg(ws, "sid", sid=_id)
 
     # Send initial flow details
-    await ws.send(json.dumps(dict(type="flows", flows=service.flows)))
+    await msg(ws, "flows", flows=service.flows)
 
+    await msg(ws, "stats", stats=service.get_stats())
+
+
+
+@app.listener('after_server_start')
+def start_scheduler(app, _loop):
+    app.add_task(service.scheduler())
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=8000, protocol=WebSocketProtocol)

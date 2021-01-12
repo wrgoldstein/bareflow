@@ -120,3 +120,21 @@ def get_flow_run_steps_with_status(status: list):
     """
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"]
 
+
+def get_flow_run_stats():
+    q = """
+    query MyQuery {
+        flow_runs {
+            flow_id
+            flow_run_steps {
+            started_at
+            ended_at
+            status
+            name
+            pod_name
+            }
+            id
+        }
+    }
+    """
+    return requests.post(url, json=dict(query=q)).json()["data"]["flow_runs"]
