@@ -36,7 +36,7 @@ function create_each_block(ctx) {
 
 	dag = new Dag({
 			props: {
-				dag: /*dag*/ ctx[2],
+				dag: /*dag*/ ctx[2][0],
 				router: /*router*/ ctx[0]
 			}
 		});
@@ -51,7 +51,7 @@ function create_each_block(ctx) {
 		},
 		p(ctx, dirty) {
 			const dag_changes = {};
-			if (dirty & /*$dags*/ 2) dag_changes.dag = /*dag*/ ctx[2];
+			if (dirty & /*$dags*/ 2) dag_changes.dag = /*dag*/ ctx[2][0];
 			if (dirty & /*router*/ 1) dag_changes.router = /*router*/ ctx[0];
 			dag.$set(dag_changes);
 		},

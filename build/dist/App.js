@@ -50,7 +50,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (79:40) 
+// (78:40) 
 function create_if_block_1(ctx) {
 	let dag;
 	let current;
@@ -80,7 +80,7 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (77:10) {#if $page == 'home'}
+// (76:10) {#if $page == 'home'}
 function create_if_block(ctx) {
 	let dags_1;
 	let current;
@@ -288,9 +288,7 @@ function create_fragment(ctx) {
 
 function instance($$self, $$props, $$invalidate) {
 	let $page;
-	let $dag_id;
 	component_subscribe($$self, page, $$value => $$invalidate(0, $page = $$value));
-	component_subscribe($$self, dag_id, $$value => $$invalidate(4, $dag_id = $$value));
 	let sid;
 	let router = navaid();
 
@@ -300,7 +298,6 @@ function instance($$self, $$props, $$invalidate) {
 		}).on("/dags/:dag_id", params => {
 			page.set("view_dag");
 			dag_id.set(params.dag_id);
-			console.log($page, $dag_id);
 		});
 
 		router.listen();

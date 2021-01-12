@@ -16,7 +16,6 @@
       .on("/dags/:dag_id", params => {
         page.set("view_dag")
         dag_id.set(params.dag_id)
-        console.log($page, $dag_id)
       })
 
     router.listen()

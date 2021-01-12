@@ -31,7 +31,8 @@
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             {#each Object.values($dags) || [] as dag}
-              <Dag {dag} {router}/>
+              <!-- TODO: incorporate steps into UI -->
+              <Dag dag={dag[0]} {router}/>
             {/each}
           </tbody>
         </table>

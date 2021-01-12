@@ -1,13 +1,13 @@
-Built a substantial part of a UI
-Can run a job on k8s
-Can stream a fake "log" to the /dag/id page
+1/11/2021:
+  In the middle of transmogrifying things to use flow_run_steps intead of the flow_run itself for state.
+  
+  Next will need to make sure the watcher.py does what it should (write logs, track state in the db)
+    * also minimize repetitive writes by comparing the state in the db
+  
+  Then figure out how to expose the state in a live way to the client (either a long streaming GET or websockets)
 
-todos:
-* stream the actual stdout of a k8s pod to the view page instead
-* introduce a concept of multiple runs
-* introduce a scheduler
-* introduce a database
-* optional use s3 for logs
-* 
+  
 
-* use pebble to make sure log tailing is cancellable
+
+  need to implement logging with automatic rotation
+  
