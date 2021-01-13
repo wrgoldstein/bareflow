@@ -1,15 +1,13 @@
 <script>
   import { fade } from "svelte/transition"
-  import { flows, flow, flow_id, selected_run, selected_step } from "./stores.js";
+  import { flows, flow, flow_id, selected_run, selected_step_ix, selected_step } from "./stores.js";
   import RunButton from "./RunButton.svelte"
   import DockerTag from "./DockerTag.svelte"
   import K8sTag from "./K8sTag.svelte"
   // export let router
 
-  let pod;
-  let logs = "";
+  let logs = {}
   let uint8array = new TextDecoder("utf-8");
-  let timestamp
 
   let slowColors = {
     // the stripes are too flashy for the bigger status badges
@@ -41,13 +39,12 @@
       if ($flow.runs.map(r => r.id).includes(res.id)) {
           clearInterval(interval)
           select_run(res.id)()
-          console.log("by golly i set the run", res.id)
         }
       }, 100
     )
     
     // selected_run.set(runs[runs.length - 1])
-    // selected_step.set(0)
+    // selected_step_ix.set(0)
     showLogs();
   };
 
@@ -58,26 +55,22 @@
     // makes on:click directives less verbose.
     return () => {
       selected_run.set($flow.runs.find(r => r.id == id))
-      selected_step.set(0)
+      selected_step_ix.set(0)
     }
   }
 
-  const showLogs = async () => {
+  const showLogs = async (pod) => {
     // This function streams the pod logs from the disk
     // to a variable here keyed on the pod (todo)
-    logs = "";
-    // const response = await fetch(`/api/logs/${pod}`)
-    // const reader = response.body.getReader()
-    // while (true){
-    //   const { value, done } = await reader.read();
-    //   logs += uint8array.decode(value) + "\n"
-    //   if (done) break;
-    // }
+    console.log("lookin for ", pod)
+    const response = await fetch(`/api/logs/${pod}`)
+    const reader = response.body.getReader()
+    while (true){
+      const { value, done } = await reader.read();
+      logs[pod] += uint8array.decode(value) + "\n"
+      if (done) break;
+    }
   };
-
-  setInterval(() => {
-    timestamp = new Date()
-  }, 500)
 
   flow.subscribe( (f) => {
     // This sets the "selected run" to the last one if
@@ -86,7 +79,32 @@
     if (f == undefined) return
     if ($selected_run != undefined) return
     selected_run.set(f.runs[f.runs.length - 1])
-    selected_step.set(0)
+  })
+
+  selected_run.subscribe(async (run) => {
+    // if the run has changed, refocus on its first step
+    // rather than whatever step of the last run we were
+    // looking at
+    if (run == undefined) return
+    selected_step.set(run.flow_run_steps[0])
+  })
+
+  selected_step_ix.subscribe(async (ix) => {
+    // sort of annoying but because runs just have steps in an array
+    // we need to keep track of the index AND the actual step
+    // that has been selected
+    if ($selected_run == undefined || $selected_run.flow_run_steps == undefined) return
+    selected_step.set($selected_run.flow_run_steps[step])
+  })
+
+  selected_step.subscribe(async (step) => {
+    // When the selected step changes, make sure we've asked for
+    // the logs for that step
+    if (step == undefined) return  // the first update is always undefined
+    if (step.pod_name == undefined) return // we don't know the pod yet
+    if (logs[step.pod_name]) return
+    logs[step.pod_name] = ""
+    await showLogs(step.pod_name)
   })
 
   $: runs = $flow && $flow.runs || []
@@ -94,7 +112,7 @@
 
 {#if $flow}
   <!-- header -->
-  <div class="lg:flex lg:items-center lg:justify-between">
+  <div class="lg:flex lg:items-center lg:justify-between pb-4">
     <div class="flex-1 min-w-0">
       <h2
         class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl
@@ -161,15 +179,11 @@
   <!-- log output -->
   <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-      <div class="flex mb-4">
-        <span class="sm:ml-3">
-          {#if pod}
-            Running on pod
-            <span class="p-1 rounded bg-blue-200">{pod}</span>
-          {/if}
-        </span>
-      </div>
-      <pre class="whitespace-pre-wrap">{logs}</pre>
+      {#key $selected_step}
+        {#if $selected_step && $selected_step.pod_name && logs[$selected_step.pod_name]}
+          <pre class="whitespace-pre-wrap">{logs[$selected_step.pod_name]}</pre>
+        {/if}
+      {/key}
     </div>
   </div>
 {:else}

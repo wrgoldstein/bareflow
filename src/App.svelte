@@ -49,7 +49,6 @@
   }
 
   onMount(async () => {
-    setInterval( () => console.log($flows), 5000)
     router
       .on("/", () => {
         page.set("home")
@@ -92,9 +91,9 @@
   })
 </script>
 
-<header class="h-full bg-blue-200 h-6" />
+<header class="h-full bg-blue-800 h-6" />
 <div>
-  <nav class="bg-gray-200">
+  <nav class="bg-gray-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center">
@@ -102,7 +101,7 @@
           </div>
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
-              <a href="#" on:click={() => router.route("/", true)} class="text-gray-800 px-3 py-2 rounded-md text-sm font-bold">Flows</a>
+              <a href="#" on:click={() => router.route("/", true)} class="text-white px-3 py-2 rounded-md text-sm font-bold">Flows</a>
           </div>
         </div>
       </div>

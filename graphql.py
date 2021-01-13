@@ -141,7 +141,10 @@ def get_flow_run_steps_by_nin_status(status: list):
 def get_flow_runs():
     q = """
     query MyQuery {
-        flow_runs {
+        flow_runs (
+            order_by: { id: desc }
+            limit: 25
+        ) {
             id
             flow_id
             flow_run_steps {

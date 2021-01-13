@@ -50,7 +50,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (116:41) 
+// (115:41) 
 function create_if_block_1(ctx) {
 	let flowview;
 	let current;
@@ -80,7 +80,7 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (114:10) {#if $page == 'home'}
+// (113:10) {#if $page == 'home'}
 function create_if_block(ctx) {
 	let flowindex;
 	let current;
@@ -164,16 +164,16 @@ function create_fragment(ctx) {
 			div7 = element("div");
 			div6 = element("div");
 			if_block.c();
-			attr(header, "class", "h-full bg-blue-200 h-6");
+			attr(header, "class", "h-full bg-blue-800 h-6");
 			attr(div0, "class", "flex-shrink-0");
 			attr(a, "href", "#");
-			attr(a, "class", "text-gray-800 px-3 py-2 rounded-md text-sm font-bold");
+			attr(a, "class", "text-white px-3 py-2 rounded-md text-sm font-bold");
 			attr(div1, "class", "ml-10 flex items-baseline space-x-4");
 			attr(div2, "class", "hidden md:block");
 			attr(div3, "class", "flex items-center");
 			attr(div4, "class", "flex items-center justify-between h-16");
 			attr(div5, "class", "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8");
-			attr(nav, "class", "bg-gray-200");
+			attr(nav, "class", "bg-gray-900");
 			attr(div6, "class", "px-4 py-6 sm:px-0");
 			attr(div7, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
 		},
@@ -309,8 +309,6 @@ function instance($$self, $$props, $$invalidate) {
 	}
 
 	onMount(async () => {
-		setInterval(() => console.log($flows), 5000);
-
 		router.on("/", () => {
 			page.set("home");
 		}).on("/flows/:flow_id", params => {
