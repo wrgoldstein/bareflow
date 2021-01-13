@@ -3,23 +3,28 @@ import {
 	SvelteComponent,
 	append,
 	attr,
+	check_outros,
 	component_subscribe,
+	create_component,
+	destroy_component,
 	detach,
 	element,
 	empty,
+	group_outros,
 	init,
 	insert,
-	listen,
+	mount_component,
 	noop,
-	run_all,
 	safe_not_equal,
 	set_data,
 	space,
-	svg_element,
-	text
+	text,
+	transition_in,
+	transition_out
 } from "../web_modules/svelte/internal.js";
 
 import { flow, flow_id } from "./stores.js";
+import RunButton from "./RunButton.js";
 
 function create_else_block(ctx) {
 	let t;
@@ -32,209 +37,122 @@ function create_else_block(ctx) {
 			insert(target, t, anchor);
 		},
 		p: noop,
+		i: noop,
+		o: noop,
 		d(detaching) {
 			if (detaching) detach(t);
 		}
 	};
 }
 
-// (33:0) {#if $flow}
+// (32:0) {#if $flow}
 function create_if_block(ctx) {
-	let div5;
-	let div3;
+	let div2;
+	let div0;
 	let h2;
 	let t0;
 	let t1;
-	let div2;
-	let div0;
-	let svg0;
-	let path0;
-	let t2;
-	let t3_value = /*$flow*/ ctx[2].schedule + "";
-	let t3;
-	let t4;
 	let div1;
-	let svg1;
-	let path1;
-	let t5;
-	let t6_value = /*$flow*/ ctx[2].image + "";
-	let t6;
-	let t7;
-	let div4;
-	let span0;
-	let t9;
-	let span1;
-	let button1;
-	let t11;
-	let span2;
-	let button2;
-	let t13;
-	let div8;
-	let div7;
+	let runbutton;
+	let t2;
+	let div3;
+	let t3;
 	let div6;
-	let span3;
-	let t14;
+	let div5;
+	let div4;
+	let span;
+	let t4;
 	let pre;
-	let t15;
-	let mounted;
-	let dispose;
+	let t5;
+	let current;
+	runbutton = new RunButton({ props: { runFlow: /*runFlow*/ ctx[4] } });
 	let if_block = /*pod*/ ctx[3] && create_if_block_1(ctx);
 
 	return {
 		c() {
-			div5 = element("div");
-			div3 = element("div");
+			div2 = element("div");
+			div0 = element("div");
 			h2 = element("h2");
 			t0 = text(/*$flow_id*/ ctx[1]);
 			t1 = space();
-			div2 = element("div");
-			div0 = element("div");
-			svg0 = svg_element("svg");
-			path0 = svg_element("path");
-			t2 = space();
-			t3 = text(t3_value);
-			t4 = space();
 			div1 = element("div");
-			svg1 = svg_element("svg");
-			path1 = svg_element("path");
-			t5 = space();
-			t6 = text(t6_value);
-			t7 = space();
-			div4 = element("div");
-			span0 = element("span");
-
-			span0.innerHTML = `<button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"><svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
-            Edit</button>`;
-
-			t9 = space();
-			span1 = element("span");
-			button1 = element("button");
-
-			button1.innerHTML = `<svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"></path></svg>
-            View`;
-
-			t11 = space();
-			span2 = element("span");
-			button2 = element("button");
-
-			button2.innerHTML = `<svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-            Run`;
-
-			t13 = space();
-			div8 = element("div");
-			div7 = element("div");
+			create_component(runbutton.$$.fragment);
+			t2 = space();
+			div3 = element("div");
+			t3 = space();
 			div6 = element("div");
-			span3 = element("span");
+			div5 = element("div");
+			div4 = element("div");
+			span = element("span");
 			if (if_block) if_block.c();
-			t14 = space();
+			t4 = space();
 			pre = element("pre");
-			t15 = text(/*logs*/ ctx[0]);
-			attr(h2, "class", "text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate");
-			attr(path0, "fill-rule", "evenodd");
-			attr(path0, "d", "M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z");
-			attr(path0, "clip-rule", "evenodd");
-			attr(svg0, "class", "flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400");
-			attr(svg0, "xmlns", "http://www.w3.org/2000/svg");
-			attr(svg0, "viewBox", "0 0 20 20");
-			attr(svg0, "fill", "currentColor");
-			attr(svg0, "aria-hidden", "true");
-			attr(div0, "class", "mt-2 flex items-center text-sm text-gray-500");
-			attr(path1, "d", "M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z");
-			attr(svg1, "class", "flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400");
-			attr(svg1, "xmlns", "http://www.w3.org/2000/svg");
-			attr(svg1, "viewBox", "0 0 24 24");
-			attr(svg1, "fill", "currentColor");
-			attr(svg1, "aria-hidden", "true");
-			attr(div1, "class", "mt-2 flex items-center text-sm text-gray-500");
-			attr(div2, "class", "mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6");
-			attr(div3, "class", "flex-1 min-w-0");
-			attr(span0, "class", "hidden sm:block");
-			attr(button1, "type", "button");
-			attr(button1, "class", "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500");
-			attr(span1, "class", "hidden sm:block ml-3");
-			attr(button2, "type", "button");
-			attr(button2, "class", "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500");
-			attr(span2, "class", "sm:ml-3");
-			attr(div4, "class", "mt-5 flex lg:mt-0 lg:ml-4");
-			attr(div5, "class", "lg:flex lg:items-center lg:justify-between");
-			attr(span3, "class", "sm:ml-3");
-			attr(div6, "class", "flex mb-4");
+			t5 = text(/*logs*/ ctx[0]);
+			attr(h2, "class", "text-2xl font-bold leading-7 text-gray-900 sm:text-3xl\n        sm:truncate");
+			attr(div0, "class", "flex-1 min-w-0");
+			attr(div1, "class", "mt-5 flex lg:mt-0 lg:ml-4");
+			attr(div2, "class", "lg:flex lg:items-center lg:justify-between");
+			attr(span, "class", "sm:ml-3");
+			attr(div4, "class", "flex mb-4");
 			attr(pre, "class", "whitespace-pre-wrap");
-			attr(div7, "class", "px-4 py-6 sm:px-0");
-			attr(div8, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
+			attr(div5, "class", "px-4 py-6 sm:px-0");
+			attr(div6, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
 		},
 		m(target, anchor) {
-			insert(target, div5, anchor);
-			append(div5, div3);
-			append(div3, h2);
-			append(h2, t0);
-			append(div3, t1);
-			append(div3, div2);
+			insert(target, div2, anchor);
 			append(div2, div0);
-			append(div0, svg0);
-			append(svg0, path0);
-			append(div0, t2);
-			append(div0, t3);
-			append(div2, t4);
+			append(div0, h2);
+			append(h2, t0);
+			append(div2, t1);
 			append(div2, div1);
-			append(div1, svg1);
-			append(svg1, path1);
-			append(div1, t5);
-			append(div1, t6);
-			append(div5, t7);
+			mount_component(runbutton, div1, null);
+			insert(target, t2, anchor);
+			insert(target, div3, anchor);
+			insert(target, t3, anchor);
+			insert(target, div6, anchor);
+			append(div6, div5);
 			append(div5, div4);
-			append(div4, span0);
-			append(div4, t9);
-			append(div4, span1);
-			append(span1, button1);
-			append(div4, t11);
-			append(div4, span2);
-			append(span2, button2);
-			insert(target, t13, anchor);
-			insert(target, div8, anchor);
-			append(div8, div7);
-			append(div7, div6);
-			append(div6, span3);
-			if (if_block) if_block.m(span3, null);
-			append(div7, t14);
-			append(div7, pre);
-			append(pre, t15);
-
-			if (!mounted) {
-				dispose = [
-					listen(button1, "click", /*view*/ ctx[5]),
-					listen(button2, "click", /*runFlow*/ ctx[4])
-				];
-
-				mounted = true;
-			}
+			append(div4, span);
+			if (if_block) if_block.m(span, null);
+			append(div5, t4);
+			append(div5, pre);
+			append(pre, t5);
+			current = true;
 		},
 		p(ctx, dirty) {
-			if (dirty & /*$flow_id*/ 2) set_data(t0, /*$flow_id*/ ctx[1]);
-			if (dirty & /*$flow*/ 4 && t3_value !== (t3_value = /*$flow*/ ctx[2].schedule + "")) set_data(t3, t3_value);
-			if (dirty & /*$flow*/ 4 && t6_value !== (t6_value = /*$flow*/ ctx[2].image + "")) set_data(t6, t6_value);
+			if (!current || dirty & /*$flow_id*/ 2) set_data(t0, /*$flow_id*/ ctx[1]);
 			if (/*pod*/ ctx[3]) if_block.p(ctx, dirty);
-			if (dirty & /*logs*/ 1) set_data(t15, /*logs*/ ctx[0]);
+			if (!current || dirty & /*logs*/ 1) set_data(t5, /*logs*/ ctx[0]);
+		},
+		i(local) {
+			if (current) return;
+			transition_in(runbutton.$$.fragment, local);
+			current = true;
+		},
+		o(local) {
+			transition_out(runbutton.$$.fragment, local);
+			current = false;
 		},
 		d(detaching) {
-			if (detaching) detach(div5);
-			if (detaching) detach(t13);
-			if (detaching) detach(div8);
+			if (detaching) detach(div2);
+			destroy_component(runbutton);
+			if (detaching) detach(t2);
+			if (detaching) detach(div3);
+			if (detaching) detach(t3);
+			if (detaching) detach(div6);
 			if (if_block) if_block.d();
-			mounted = false;
-			run_all(dispose);
 		}
 	};
 }
 
-// (93:10) {#if pod}
+// (57:10) {#if pod}
 function create_if_block_1(ctx) {
 	let t0;
 	let span;
 
 	return {
 		c() {
-			t0 = text("Running on pod ");
+			t0 = text("Running on pod\n            ");
 			span = element("span");
 			span.textContent = `${/*pod*/ ctx[3]}`;
 			attr(span, "class", "p-1 rounded bg-blue-200");
@@ -252,15 +170,20 @@ function create_if_block_1(ctx) {
 }
 
 function create_fragment(ctx) {
+	let current_block_type_index;
+	let if_block;
 	let if_block_anchor;
+	let current;
+	const if_block_creators = [create_if_block, create_else_block];
+	const if_blocks = [];
 
 	function select_block_type(ctx, dirty) {
-		if (/*$flow*/ ctx[2]) return create_if_block;
-		return create_else_block;
+		if (/*$flow*/ ctx[2]) return 0;
+		return 1;
 	}
 
-	let current_block_type = select_block_type(ctx, -1);
-	let if_block = current_block_type(ctx);
+	current_block_type_index = select_block_type(ctx, -1);
+	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
 	return {
 		c() {
@@ -268,26 +191,48 @@ function create_fragment(ctx) {
 			if_block_anchor = empty();
 		},
 		m(target, anchor) {
-			if_block.m(target, anchor);
+			if_blocks[current_block_type_index].m(target, anchor);
 			insert(target, if_block_anchor, anchor);
+			current = true;
 		},
 		p(ctx, [dirty]) {
-			if (current_block_type === (current_block_type = select_block_type(ctx, dirty)) && if_block) {
-				if_block.p(ctx, dirty);
-			} else {
-				if_block.d(1);
-				if_block = current_block_type(ctx);
+			let previous_block_index = current_block_type_index;
+			current_block_type_index = select_block_type(ctx, dirty);
 
-				if (if_block) {
+			if (current_block_type_index === previous_block_index) {
+				if_blocks[current_block_type_index].p(ctx, dirty);
+			} else {
+				group_outros();
+
+				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+					if_blocks[previous_block_index] = null;
+				});
+
+				check_outros();
+				if_block = if_blocks[current_block_type_index];
+
+				if (!if_block) {
+					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 					if_block.c();
-					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+				} else {
+					if_block.p(ctx, dirty);
 				}
+
+				transition_in(if_block, 1);
+				if_block.m(if_block_anchor.parentNode, if_block_anchor);
 			}
 		},
-		i: noop,
-		o: noop,
+		i(local) {
+			if (current) return;
+			transition_in(if_block);
+			current = true;
+		},
+		o(local) {
+			transition_out(if_block);
+			current = false;
+		},
 		d(detaching) {
-			if_block.d(detaching);
+			if_blocks[current_block_type_index].d(detaching);
 			if (detaching) detach(if_block_anchor);
 		}
 	};
@@ -322,7 +267,7 @@ function instance($$self, $$props, $$invalidate) {
 	// while (true){
 	//   const { value, done } = await reader.read();
 
-	return [logs, $flow_id, $flow, pod, runFlow, view];
+	return [logs, $flow_id, $flow, pod, runFlow];
 }
 
 class FlowView extends SvelteComponent {

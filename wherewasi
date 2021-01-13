@@ -11,3 +11,45 @@
 
   need to implement logging with automatic rotation
   
+  in the middle of implementing a new view page for a flow.
+
+
+-----------------------------------------------------------
+<flow name>                                   <run button>
+
+each step:
+  <step name, image, and command>
+
+each run:
+  <bar graph with color as state and height as duration>
+
+each step for selected run (default to most recent):
+  show status and duration as a long horizontal bar
+  log output for that step
+
+   ______
+  🭻|      🭰🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🮀🭰
+|                                🭵
+|                                🭵
+|                                🭵
+|          LOGS                  🭵
+|                                🭵
+|                                🭵
+|                                🭵
+|________________________________
+
+
+After that we need to make sure we emit events over the socket for
+changes in state and incorporate them into the UI.
+
+And make sure log requesting is all tied up.
+
+And that's a v0.00001 demo.
+
+Next would be:
+  Actual DAGs
+  Actual scheduler
+  Tests?
+  Longer running job?
+  Using private images?
+  Easy linking to logdna / papertrail / whatever?
