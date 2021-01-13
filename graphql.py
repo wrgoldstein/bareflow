@@ -25,6 +25,8 @@ def create_flow_run_and_steps(flow_id: str, steps: list):
         }}) 
         {{
             id
+            created_at
+            flow_id
             flow_run_steps {{ id }}
         }}
     }}
@@ -106,7 +108,7 @@ def get_flow_run_step(flow_run_step_id: int):
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"][0]
 
 
-def get_flow_run_steps_with_status(status: list):
+def get_flow_run_steps_by_status(status: list):
     status = f"""{','.join([f'"{x}"' for x in status])}"""
     q = f"""
     query MyQuery {{
@@ -121,19 +123,19 @@ def get_flow_run_steps_with_status(status: list):
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"]
 
 
-def get_flow_run_stats():
+def get_flow_runs():
     q = """
     query MyQuery {
         flow_runs {
             flow_id
-            flow_run_steps {
-            started_at
-            ended_at
-            status
-            name
-            pod_name
-            }
             id
+            flow_run_steps {
+                started_at
+                ended_at
+                status
+                name
+                pod_name
+            }
         }
     }
     """

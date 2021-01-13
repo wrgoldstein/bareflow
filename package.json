@@ -12,6 +12,7 @@
     "env-cmd": "^10.1.0",
     "navaid": "^1.2.0",
     "svelte": "^3.31.2",
+    "svelte-charts": "github:wrgoldstein/svelte-charts",
     "tailwindcss": "^2.0.2"
   }
 }

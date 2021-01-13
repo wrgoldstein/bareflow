@@ -1,5 +1,6 @@
 <script>
   import { flow, flow_id } from "./stores.js";
+  import FlowRunChart from "./FlowRunChart.svelte"
   import RunButton from "./RunButton.svelte"
   // export let router
 
@@ -10,8 +11,6 @@
   const runFlow = async () => {
     // todo have some sort of ui state that shows its running
     const res = await fetch(`/run/${$flow_id}`, { method: "POST" });
-    // to get to a POC just storing the current pod run after a triggered run
-    // no history yet
     showLogs();
   };
 
@@ -45,9 +44,10 @@
   </div>
 
   <!-- run history -->
-  <div>
-    
-  </div>
+  {#if $flow.runs.length > 0 }
+    <!-- {console.log($flow.runs)} -->
+    <FlowRunChart runs={$flow.runs} />
+  {/if}
 
   <!-- log output -->
   <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -63,4 +63,6 @@
       <pre class="whitespace-pre-wrap">{logs}</pre>
     </div>
   </div>
-{:else}loading{/if}
+{:else}
+  loading
+{/if}

@@ -24,6 +24,7 @@ import {
 } from "../web_modules/svelte/internal.js";
 
 import { flow, flow_id } from "./stores.js";
+import FlowRunChart from "./FlowRunChart.js";
 import RunButton from "./RunButton.js";
 
 function create_else_block(ctx) {
@@ -45,7 +46,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (32:0) {#if $flow}
+// (31:0) {#if $flow}
 function create_if_block(ctx) {
 	let div2;
 	let div0;
@@ -55,18 +56,18 @@ function create_if_block(ctx) {
 	let div1;
 	let runbutton;
 	let t2;
-	let div3;
 	let t3;
-	let div6;
 	let div5;
 	let div4;
+	let div3;
 	let span;
 	let t4;
 	let pre;
 	let t5;
 	let current;
 	runbutton = new RunButton({ props: { runFlow: /*runFlow*/ ctx[4] } });
-	let if_block = /*pod*/ ctx[3] && create_if_block_1(ctx);
+	let if_block0 = /*$flow*/ ctx[2].runs.length > 0 && create_if_block_2(ctx);
+	let if_block1 = /*pod*/ ctx[3] && create_if_block_1(ctx);
 
 	return {
 		c() {
@@ -78,13 +79,13 @@ function create_if_block(ctx) {
 			div1 = element("div");
 			create_component(runbutton.$$.fragment);
 			t2 = space();
-			div3 = element("div");
+			if (if_block0) if_block0.c();
 			t3 = space();
-			div6 = element("div");
 			div5 = element("div");
 			div4 = element("div");
+			div3 = element("div");
 			span = element("span");
-			if (if_block) if_block.c();
+			if (if_block1) if_block1.c();
 			t4 = space();
 			pre = element("pre");
 			t5 = text(/*logs*/ ctx[0]);
@@ -93,10 +94,10 @@ function create_if_block(ctx) {
 			attr(div1, "class", "mt-5 flex lg:mt-0 lg:ml-4");
 			attr(div2, "class", "lg:flex lg:items-center lg:justify-between");
 			attr(span, "class", "sm:ml-3");
-			attr(div4, "class", "flex mb-4");
+			attr(div3, "class", "flex mb-4");
 			attr(pre, "class", "whitespace-pre-wrap");
-			attr(div5, "class", "px-4 py-6 sm:px-0");
-			attr(div6, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
+			attr(div4, "class", "px-4 py-6 sm:px-0");
+			attr(div5, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
 		},
 		m(target, anchor) {
 			insert(target, div2, anchor);
@@ -107,40 +108,100 @@ function create_if_block(ctx) {
 			append(div2, div1);
 			mount_component(runbutton, div1, null);
 			insert(target, t2, anchor);
-			insert(target, div3, anchor);
+			if (if_block0) if_block0.m(target, anchor);
 			insert(target, t3, anchor);
-			insert(target, div6, anchor);
-			append(div6, div5);
+			insert(target, div5, anchor);
 			append(div5, div4);
-			append(div4, span);
-			if (if_block) if_block.m(span, null);
-			append(div5, t4);
-			append(div5, pre);
+			append(div4, div3);
+			append(div3, span);
+			if (if_block1) if_block1.m(span, null);
+			append(div4, t4);
+			append(div4, pre);
 			append(pre, t5);
 			current = true;
 		},
 		p(ctx, dirty) {
 			if (!current || dirty & /*$flow_id*/ 2) set_data(t0, /*$flow_id*/ ctx[1]);
-			if (/*pod*/ ctx[3]) if_block.p(ctx, dirty);
+
+			if (/*$flow*/ ctx[2].runs.length > 0) {
+				if (if_block0) {
+					if_block0.p(ctx, dirty);
+
+					if (dirty & /*$flow*/ 4) {
+						transition_in(if_block0, 1);
+					}
+				} else {
+					if_block0 = create_if_block_2(ctx);
+					if_block0.c();
+					transition_in(if_block0, 1);
+					if_block0.m(t3.parentNode, t3);
+				}
+			} else if (if_block0) {
+				group_outros();
+
+				transition_out(if_block0, 1, 1, () => {
+					if_block0 = null;
+				});
+
+				check_outros();
+			}
+
+			if (/*pod*/ ctx[3]) if_block1.p(ctx, dirty);
 			if (!current || dirty & /*logs*/ 1) set_data(t5, /*logs*/ ctx[0]);
 		},
 		i(local) {
 			if (current) return;
 			transition_in(runbutton.$$.fragment, local);
+			transition_in(if_block0);
 			current = true;
 		},
 		o(local) {
 			transition_out(runbutton.$$.fragment, local);
+			transition_out(if_block0);
 			current = false;
 		},
 		d(detaching) {
 			if (detaching) detach(div2);
 			destroy_component(runbutton);
 			if (detaching) detach(t2);
-			if (detaching) detach(div3);
+			if (if_block0) if_block0.d(detaching);
 			if (detaching) detach(t3);
-			if (detaching) detach(div6);
-			if (if_block) if_block.d();
+			if (detaching) detach(div5);
+			if (if_block1) if_block1.d();
+		}
+	};
+}
+
+// (47:2) {#if $flow.runs.length > 0 }
+function create_if_block_2(ctx) {
+	let flowrunchart;
+	let current;
+	flowrunchart = new FlowRunChart({ props: { runs: /*$flow*/ ctx[2].runs } });
+
+	return {
+		c() {
+			create_component(flowrunchart.$$.fragment);
+		},
+		m(target, anchor) {
+			mount_component(flowrunchart, target, anchor);
+			current = true;
+		},
+		p(ctx, dirty) {
+			const flowrunchart_changes = {};
+			if (dirty & /*$flow*/ 4) flowrunchart_changes.runs = /*$flow*/ ctx[2].runs;
+			flowrunchart.$set(flowrunchart_changes);
+		},
+		i(local) {
+			if (current) return;
+			transition_in(flowrunchart.$$.fragment, local);
+			current = true;
+		},
+		o(local) {
+			transition_out(flowrunchart.$$.fragment, local);
+			current = false;
+		},
+		d(detaching) {
+			destroy_component(flowrunchart, detaching);
 		}
 	};
 }
@@ -251,8 +312,6 @@ function instance($$self, $$props, $$invalidate) {
 		// todo have some sort of ui state that shows its running
 		const res = await fetch(`/run/${$flow_id}`, { method: "POST" });
 
-		// to get to a POC just storing the current pod run after a triggered run
-		// no history yet
 		showLogs();
 	};
 

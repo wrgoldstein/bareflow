@@ -5,9 +5,12 @@
 4. Implement dependencies
 5. Separate library code from dags
 """
-
 import asyncio
+import collections
+import functools
 import importlib.util
+import itertools
+import json
 import sys
 import uuid
 from contextlib import contextmanager
@@ -20,6 +23,8 @@ import graphql
 import stats
 from flow import flows
 
+queue = None
+
 # Load all dags.. this should be more dynamical
 paths = Path('flows').glob('*.py')  #TODO nested
 for path in paths:
@@ -28,8 +33,12 @@ for path in paths:
     spec.loader.exec_module(mod)
 
 
-def schedule_flow(flow_id: str, steps: list):
-    flow_run = graphql.create_flow_run_and_steps(flow_id, steps)
+async def schedule_flow(flow_id: str, flow: dict):
+    flow_run = graphql.create_flow_run_and_steps(flow_id, flow["steps"])
+    queue.put_nowait({"type": "event", "flow_run": flow_run})
+    for ws in websockets.values():
+        print("sending", ws)
+        await ws.send(json.dumps(dict(type="event", msg="hellooo")))
     flow_run_id = flow_run['id']
     flow_run_step_ids = [x['id'] for x in flow_run['flow_run_steps']]
 
@@ -39,6 +48,7 @@ watcher = watch.Watch()
 batch_v1 = client.BatchV1Api()
 v1 = client.CoreV1Api()
 
+websockets = {}
 
 def create_job_object(flow_run_step_id, params):
     # Configureate Pod template container
@@ -109,27 +119,40 @@ async def run_step(step):
     log.terminate()
 
 
-def get_stats():
+def get_flows():
     """
-    Get recent run stats (success/fail and duration)
+    Get recent run stats (success/fail and duration).
     """
-    run_stats = graphql.get_flow_run_stats()
-    #TODO just dont have time to do this properly
-    return stats.roll_up_stats(run_stats)
 
-    
+    #TODO this is embarrassing garbage but on the clock
+    flow_runs = graphql.get_flow_runs()
+    groups = {}
+    for key, group in itertools.groupby(flow_runs, lambda x: x["flow_id"]):
+        groups[key] = []
+        for run in group:
+            groups[key].append(run)
+    res = {}
+    for flow_id in flows.keys():
+        res[flow_id] = { "runs": [] }
+        group = groups.get(flow_id, [])
+        for run in group:
+            durations = [x for x in [stats.parse_duration_from_step(step) for step in run["flow_run_steps"]] if x]
+            succeeded = all([step["status"] == "succeeded" for step in run["flow_run_steps"]])
+        
+            run["duration"] = sum(durations)
+            run["status"] = "succeeded" if succeeded else "failed"
+            res[flow_id]["runs"].append(run)
+    return res
 
 async def scheduler():
     while True:
-        print("Looking for steps to run")
         # Check if any run steps are eligible to be sent to kubernetes
 
         #TODO eventually there will be some dependency management to do here, but for now
         # any step that has been put in the database will be run immediately.
-        eligible_flow_run_steps = graphql.get_flow_run_steps_with_status(["created"])
+        eligible_flow_run_steps = graphql.get_flow_run_steps_by_status(["created"])
 
         #TODO actual logging
-        print(f"found {len(eligible_flow_run_steps)}")
 
         for step in eligible_flow_run_steps:
             asyncio.create_task(run_step(step))
@@ -142,5 +165,4 @@ async def scheduler():
 
 
 if __name__ == "__main__":
-    # loop = asyncio.get_event_loop()
     asyncio.run(scheduler())

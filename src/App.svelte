@@ -9,7 +9,46 @@
   let sid
   let router = navaid()
 
+  function updateFlow(_flow_id, body){
+    if (!(_flow_id in $flows)){
+      console.log("tried to update non existing flow", _flow_id)
+      return
+    }
+    let temp = $flows[_flow_id]
+    temp = {...temp, ...body}  
+    flows.update(self => {
+      self[_flow_id] = temp
+      return self
+    })
+  }
+
+  function updateFlowRun(flow_id_, run_id, body){
+    console.log("updatin'")
+    let flow = $flows[flow_id_]
+    console.log("found flow", flow)
+    if (!("runs" in flow)){
+      return
+    }
+    console.log("continuing")
+    let new_runs
+    if (run_id in flow.runs.map(r => r.flow_run_id)){
+      new_runs = flow.runs.map(r => 
+        r.flow_run_id == run_id ? { ...r, ...body } : r
+      )
+    } else {
+      new_runs = flow.runs
+      new_runs.push(body)
+    }
+    flow.runs = new_runs
+    flows.update(self => {
+      self[flow_id_] = flow
+      return self
+    })
+    console.log($flows)
+  }
+
   onMount(async () => {
+    setInterval( () => console.log($flows), 5000)
     router
       .on("/", () => {
         page.set("home")
@@ -30,31 +69,17 @@
 
     socket.addEventListener("message", event => {
       const message = JSON.parse(event.data)
+      console.log(message)
       switch (message.type) {
-        case "sid":
-          sid = message.sid
-          break
         case "flows":
           flows.set(message.flows)
           break
-        case "stats":
-
-          // assign the initial stats to their flows
-          for (let _flow_id in message.stats){
-            if (_flow_id in $flows){
-              let temp = $flows[_flow_id]
-              temp["runs"] = message.stats[_flow_id]
-              flows.update(self => {
-                self[_flow_id] = temp
-                return self
-              })
-            }
-          }
-          break
 
         case "event":
-          console.log(message)
-          break
+          if ("flow_run" in message){
+            let flow_run = message.flow_run
+            updateFlowRun(flow_run.flow_id, flow_run.id, flow_run)
+          }
       }
     })
   })
