@@ -36,11 +36,7 @@ for path in paths:
 async def schedule_flow(flow_id: str, flow: dict):
     flow_run = graphql.create_flow_run_and_steps(flow_id, flow["steps"])
     queue.put_nowait({"type": "event", "flow_run": flow_run})
-    for ws in websockets.values():
-        print("sending", ws)
-        await ws.send(json.dumps(dict(type="event", msg="hellooo")))
-    flow_run_id = flow_run['id']
-    flow_run_step_ids = [x['id'] for x in flow_run['flow_run_steps']]
+    return flow_run
 
 
 config.load_kube_config()
@@ -84,9 +80,9 @@ async def get_pod_for_job(job):
     return pods.items[0]  # one pod per job
 
 
-async def wait_for_pod_status(pod, statuses):
+async def wait_for_pod_status(pod_name, statuses):
     while True:
-        res = v1.read_namespaced_pod_status(namespace="default", name=pod.metadata.name)
+        res = v1.read_namespaced_pod_status(namespace="default", name=pod_name)
         if res.status.phase in statuses:
             return res.status.phase
         
@@ -95,28 +91,49 @@ async def wait_for_pod_status(pod, statuses):
 
 async def run_step(step):
     flow_run_step_id = step.pop("id")
-    job = create_job_object(flow_run_step_id, step)
+    params = {k:v for k,v in step.items() if k not in ["status", "pod_name"]}
+    job = create_job_object(flow_run_step_id, params)
     _api_response = batch_v1.create_namespaced_job(
             body=job,
             namespace="default"
     )
     pod = await get_pod_for_job(job)
-    graphql.update_flow_run_step(flow_run_step_id, status="started", started_at=datetime.now(timezone.utc))
+    flow_run_step = graphql.update_flow_run_step(flow_run_step_id, pod_name=pod.metadata.name, status="started", started_at=datetime.now(timezone.utc))
+    queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
 
     # Wait for pod to leave the Pending state to begin tailing the log
-    status = await wait_for_pod_status(pod, ["Succeeded", "Failed", "Unknown", "Running"])
-    graphql.update_flow_run_step(flow_run_step_id, status=status.lower())
+    status = await wait_for_pod_status(pod.metadata.name, ["Succeeded", "Failed", "Unknown", "Running"])
+    flow_run_step = graphql.update_flow_run_step(flow_run_step_id, status=status.lower())
+    queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
 
     # this is tricky to do in python
     log = await asyncio.create_subprocess_shell(f"kubectl logs -n default {pod.metadata.name} --follow > pod-logs/{pod.metadata.name}")
-    graphql.update_flow_run_step(flow_run_step_id, log_status="local")
+    flow_run_step = graphql.update_flow_run_step(flow_run_step_id, log_status="local")
+    queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
 
     # wait for the pod to finish before terminating the log tailing subprocess
-    status = await wait_for_pod_status(pod, ["Succeeded", "Failed", "Unknown"])
+    status = await wait_for_pod_status(pod.metadata.name, ["Succeeded", "Failed", "Unknown"])
+    queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
 
-    graphql.update_flow_run_step(flow_run_step_id, status=status.lower(), ended_at=datetime.now(timezone.utc))
-    
+    flow_run_step = graphql.update_flow_run_step(flow_run_step_id, status=status.lower(), ended_at=datetime.now(timezone.utc))
+    queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
+
     log.terminate()
+
+async def reattach_to_step(step):
+    # We may have lost track of a step (if it's not created, queued, or finished)
+    # If we know the pod name, then check if its done. If it's done, then update the db.
+    pod_name = step.get("pod_name")
+    if pod_name is not None:
+        log = await asyncio.create_subprocess_shell(f"kubectl logs -n default {pod_name} --follow > pod-logs/{pod_name}")
+        status = await wait_for_pod_status(pod_name, ["Succeeded", "Failed", "Unknown"])
+        flow_run_step=graphql.update_flow_run_step(step["id"], status=status.lower())
+        queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
+    else:
+        # As far as we can tell this was never even started
+        asyncio.create_task(run_step(step))
+        flow_run_step=graphql.update_flow_run_step(step["id"], status="queued")
+        queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
 
 
 def get_flows():
@@ -150,17 +167,27 @@ async def scheduler():
 
         #TODO eventually there will be some dependency management to do here, but for now
         # any step that has been put in the database will be run immediately.
-        eligible_flow_run_steps = graphql.get_flow_run_steps_by_status(["created"])
+        unscheduled_flow_run_steps = graphql.get_flow_run_steps_by_nin_status(["queued", "succeeded", "failed"])
 
         #TODO actual logging
 
-        for step in eligible_flow_run_steps:
-            asyncio.create_task(run_step(step))
-            graphql.update_flow_run_step(step["id"], status="queued")
+        for step in unscheduled_flow_run_steps:
+
+            if step["status"] == "created":
+                asyncio.create_task(run_step(step))
+                flow_run_step=graphql.update_flow_run_step(step["id"], status="queued")
+                queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
+            elif step["status"] == "started":
+                await reattach_to_step(step)
+            else:
+                print("not sure whats up with this step", step)
+            
 
             #TODO update the flow run itself (if this is the last step of the run)
 
-        #TODO Check if any flows have been scheduled
+
+        #TODO Check if any flows should be scheduled by cron
+
         await asyncio.sleep(5)
 
 

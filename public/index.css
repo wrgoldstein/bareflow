@@ -1,18 +1,33 @@
 @import 'tailwindcss/dist/tailwind.css';
 
-.bg-drawing {
-  z-index: 0;
+.stripe-yellow {
+  background-image: 
+    repeating-linear-gradient(
+      -45deg, 
+      transparent, 
+      transparent .2rem,
+      #fcba03 .2rem,
+      #fcba03 .4rem
+    );
+  background-size: 200% 200%;
+  animation: barberpole 1s linear infinite;
 }
 
-.bg-drawing:before {
-  background-image: url("kandinsky2.jpg");
-  z-index: 1;
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  content: '';
-  opacity: .25;
+.stripe-green {
+  background-image: 
+    repeating-linear-gradient(
+      -45deg, 
+      transparent, 
+      transparent .2rem,
+      #059668dd .2rem,
+      #059668dd .4rem
+    );
+  background-size: 200% 200%;
+  animation: barberpole 1s linear infinite;
+}
+
+@keyframes barberpole {
+  100% {
+    background-position: 100% 100%;
+  }
 }

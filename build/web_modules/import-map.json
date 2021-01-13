@@ -4,6 +4,7 @@
     "svelte": "./svelte.js",
     "svelte/internal": "./svelte/internal.js",
     "svelte/store": "./svelte/store.js",
+    "svelte/transition": "./svelte/transition.js",
     "tailwindcss/dist/tailwind.css": "./tailwindcss/dist/tailwind.css"
   }
 }

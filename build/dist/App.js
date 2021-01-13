@@ -28,7 +28,7 @@ import navaid from "../web_modules/navaid.js";
 import { onMount } from "../web_modules/svelte.js";
 import FlowIndex from "./FlowIndex.js";
 import FlowView from "./FlowView.js";
-import { flows, page, flow_id } from "./stores.js";
+import { flows, page, flow_id, selected_run } from "./stores.js";
 
 function create_else_block(ctx) {
 	let div;
@@ -50,7 +50,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (113:41) 
+// (116:41) 
 function create_if_block_1(ctx) {
 	let flowview;
 	let current;
@@ -80,7 +80,7 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (111:10) {#if $page == 'home'}
+// (114:10) {#if $page == 'home'}
 function create_if_block(ctx) {
 	let flowindex;
 	let current;
@@ -122,10 +122,8 @@ function create_fragment(ctx) {
 	let t1;
 	let div2;
 	let div1;
-	let a0;
+	let a;
 	let t3;
-	let a1;
-	let t5;
 	let main;
 	let div7;
 	let div6;
@@ -156,32 +154,26 @@ function create_fragment(ctx) {
 			div4 = element("div");
 			div3 = element("div");
 			div0 = element("div");
-			div0.innerHTML = `<img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Workflow"/>`;
 			t1 = space();
 			div2 = element("div");
 			div1 = element("div");
-			a0 = element("a");
-			a0.textContent = "Flows";
+			a = element("a");
+			a.textContent = "Flows";
 			t3 = space();
-			a1 = element("a");
-			a1.textContent = "Placeholder";
-			t5 = space();
 			main = element("main");
 			div7 = element("div");
 			div6 = element("div");
 			if_block.c();
-			attr(header, "class", "h-full bg-blue-400 h-6");
+			attr(header, "class", "h-full bg-blue-200 h-6");
 			attr(div0, "class", "flex-shrink-0");
-			attr(a0, "href", "#");
-			attr(a0, "class", "bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium");
-			attr(a1, "href", "#");
-			attr(a1, "class", "text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium");
+			attr(a, "href", "#");
+			attr(a, "class", "text-gray-800 px-3 py-2 rounded-md text-sm font-bold");
 			attr(div1, "class", "ml-10 flex items-baseline space-x-4");
 			attr(div2, "class", "hidden md:block");
 			attr(div3, "class", "flex items-center");
 			attr(div4, "class", "flex items-center justify-between h-16");
 			attr(div5, "class", "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8");
-			attr(nav, "class", "bg-gray-800");
+			attr(nav, "class", "bg-gray-200");
 			attr(div6, "class", "px-4 py-6 sm:px-0");
 			attr(div7, "class", "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8");
 		},
@@ -197,10 +189,8 @@ function create_fragment(ctx) {
 			append(div3, t1);
 			append(div3, div2);
 			append(div2, div1);
-			append(div1, a0);
-			append(div1, t3);
-			append(div1, a1);
-			append(div8, t5);
+			append(div1, a);
+			append(div8, t3);
 			append(div8, main);
 			append(main, div7);
 			append(div7, div6);
@@ -208,7 +198,7 @@ function create_fragment(ctx) {
 			current = true;
 
 			if (!mounted) {
-				dispose = listen(a0, "click", /*click_handler*/ ctx[2]);
+				dispose = listen(a, "click", /*click_handler*/ ctx[2]);
 				mounted = true;
 			}
 		},
@@ -261,54 +251,61 @@ function create_fragment(ctx) {
 
 function instance($$self, $$props, $$invalidate) {
 	let $flows;
+	let $selected_run;
 	let $page;
 	component_subscribe($$self, flows, $$value => $$invalidate(3, $flows = $$value));
+	component_subscribe($$self, selected_run, $$value => $$invalidate(4, $selected_run = $$value));
 	component_subscribe($$self, page, $$value => $$invalidate(0, $page = $$value));
 	let sid;
 	let router = navaid();
 
 	function updateFlow(_flow_id, body) {
+		// update a flow, by id
 		if (!(_flow_id in $flows)) {
 			console.log("tried to update non existing flow", _flow_id);
 			return;
 		}
 
-		let temp = $flows[_flow_id];
-		temp = { ...temp, ...body };
-
-		flows.update(self => {
-			self[_flow_id] = temp;
-			return self;
-		});
+		let copied = Object.assign({}, $flows[_flow_id], body);
+		flows.set(copied);
 	}
 
 	function updateFlowRun(flow_id_, run_id, body) {
-		console.log("updatin'");
+		// update a flow run, by flow id and run id
 		let flow = $flows[flow_id_];
-		console.log("found flow", flow);
 
-		if (!("runs" in flow)) {
+		let i = flow.runs.findIndex(x => x.id == run_id);
+
+		if (i == -1) {
+			flow.runs = [...flow.runs, body];
+		} else {
+			flow.runs[i] = { ...flow.runs[i], ...body };
+		}
+
+		let copied = Object.assign($flows, { [flow_id_]: flow });
+		flows.set(copied);
+	}
+
+	function updateFlowRunStep(flow_id_, run_id, step_id, body) {
+		// update a flow run step, using all three ids
+		let flow = $flows[flow_id_];
+
+		let i = flow.runs.findIndex(x => x.id == run_id);
+
+		if (i == -1) {
+			console.log("tried to update a step belonging to an unknown run");
 			return;
 		}
 
-		console.log("continuing");
-		let new_runs;
+		let ii = flow.runs[i].flow_run_steps.findIndex(x => x.id == step_id);
 
-		if (run_id in flow.runs.map(r => r.flow_run_id)) {
-			new_runs = flow.runs.map(r => r.flow_run_id == run_id ? { ...r, ...body } : r);
-		} else {
-			new_runs = flow.runs;
-			new_runs.push(body);
-		}
+		flow.runs[i].flow_run_steps[ii] = {
+			...flow.runs[i].flow_run_steps[ii],
+			...body
+		};
 
-		flow.runs = new_runs;
-
-		flows.update(self => {
-			self[flow_id_] = flow;
-			return self;
-		});
-
-		console.log($flows);
+		let copied = Object.assign($flows, { [flow_id_]: flow });
+		flows.set(copied);
 	}
 
 	onMount(async () => {
@@ -340,6 +337,11 @@ function instance($$self, $$props, $$invalidate) {
 					if ("flow_run" in message) {
 						let flow_run = message.flow_run;
 						updateFlowRun(flow_run.flow_id, flow_run.id, flow_run);
+					} else if ("flow_run_step" in message) {
+						let flow_run_step = message.flow_run_step;
+						let flow_run = message.flow_run_step.flow_run;
+						selected_run.set($selected_run);
+						updateFlowRunStep(flow_run.flow_id, flow_run.id, flow_run_step.id, flow_run_step);
 					}
 			}
 		});

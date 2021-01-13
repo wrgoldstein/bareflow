@@ -20,16 +20,11 @@ def get_users():
 
 async def eventing(queue):
     while True:
-        try:
-            print("notifying")
-            print("len users", len(USERS), get_users())
-            event = await queue.get()
-            if USERS:
-                await asyncio.wait([user.send(json.dumps(event)) for user in USERS])
-            queue.task_done()
-            await asyncio.sleep(3)
-        except:
-            print("the actual exception was here?")
+        event = await queue.get()
+        if USERS:
+            await asyncio.wait([user.send(json.dumps(event)) for user in USERS])
+        queue.task_done()
+        await asyncio.sleep(3)
 
 
 async def register(websocket):
@@ -66,11 +61,10 @@ async def logs(request, pod):
 @app.route("/run/<flow_id>", methods=["POST"])
 async def run(request, flow_id):
     flow = service.flows[flow_id]
-    await service.schedule_flow(flow_id, flow)
+    flow_run = await service.schedule_flow(flow_id, flow)
     # This will run the flow in the background. The status
-    # will be updated in the `flow_runs` table in the database.
-    
-    return response.empty()
+    # will be updated in the `flow_runs` table in the database.    
+    return response.json(flow_run)
 
 
 clients = {}
@@ -80,9 +74,7 @@ async def msg(ws, type, **body):
 
 @app.websocket("/ws")
 async def feed(request, ws):
-    print("WHAA")
     await register(ws)
-    print("LEN", len(USERS))
     try:
         # Send initial flow details
         await msg(ws, "flows", flows=service.get_flows())
@@ -90,7 +82,6 @@ async def feed(request, ws):
             # we don't expect to receive any messages
             data = json.loads(message)
     finally:
-        print("unregistering that fool")
         await unregister(ws)
 
 
