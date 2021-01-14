@@ -1,10 +1,12 @@
 import os
 import requests
 import json
+from typing import List
 
 url = os.getenv("HASURA_ENDPOINT", "http://localhost:8080/v1/graphql")
 
-def create_flow_run_and_steps(flow_id: str, steps: list):
+
+def create_flow_run_and_steps(flow_id: str, steps: List[dict]) -> dict:
     flow_run_steps = []
     for step in steps:
         name = step["name"]
@@ -13,21 +15,21 @@ def create_flow_run_and_steps(flow_id: str, steps: list):
         flow_run_step = f'{{ name: "{name}", image: "{image}", command: {json.dumps(command)},  status: "created" }}'
 
         flow_run_steps.append(flow_run_step)
-    
+
     flow_run_steps = ",\n".join(flow_run_steps)
 
     q = f"""
     mutation MyMutation {{
         insert_flow_runs_one(object: {{
             flow_run_steps: {{   data: [{flow_run_steps}] }},
-            flow_id: "{flow_id}", 
+            flow_id: "{flow_id}",
             status: "created"
-        }}) 
+        }})
         {{
             id
             created_at
             flow_id
-            flow_run_steps {{ 
+            flow_run_steps {{
                 id
                 name
                 image
@@ -37,10 +39,10 @@ def create_flow_run_and_steps(flow_id: str, steps: list):
         }}
     }}
     """
-    return requests.post(url, json=dict(query=q)).json()["data"]['insert_flow_runs_one']
+    return requests.post(url, json=dict(query=q)).json()["data"]["insert_flow_runs_one"]
 
 
-def update_flow_run(flow_run_id, **kwargs):
+def update_flow_run(flow_run_id: int, **kwargs) -> dict:
     _set = ""
     for key, value in kwargs.items():
         _set += f'\n{key}: "{value}"\n'
@@ -59,7 +61,7 @@ def update_flow_run(flow_run_id, **kwargs):
     return requests.post(url, json=dict(query=q)).json()["data"]
 
 
-def update_flow_run_step(flow_run_step_id, **kwargs):
+def update_flow_run_step(flow_run_step_id: int, **kwargs) -> dict:
     _set = ""
     for key, value in kwargs.items():
         _set += f'\n{key}: "{value}"\n'
@@ -82,10 +84,12 @@ def update_flow_run_step(flow_run_step_id, **kwargs):
         }}
     }}
     """
-    return requests.post(url, json=dict(query=q)).json()["data"]["update_flow_run_steps_by_pk"]
+    return requests.post(url, json=dict(query=q)).json()["data"][
+        "update_flow_run_steps_by_pk"
+    ]
 
 
-def get_flow_run(flow_run_id, **kwargs):
+def get_flow_run(flow_run_id: int, **kwargs) -> dict:
     q = f"""
         query MyQuery {{
             flow_runs(where: {{id: {{_eq: {flow_run_id} }} }}) {{
@@ -107,7 +111,7 @@ def get_flow_run(flow_run_id, **kwargs):
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_runs"]
 
 
-def get_flow_run_step(flow_run_step_id: int):
+def get_flow_run_step(flow_run_step_id: int) -> dict:
     q = f"""
     query MyQuery {{
         flow_run_steps(where: {{ id: {{_eq: {flow_run_step_id}  }}  }}) {{
@@ -121,7 +125,7 @@ def get_flow_run_step(flow_run_step_id: int):
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"][0]
 
 
-def get_flow_run_steps_by_nin_status(status: list):
+def get_flow_run_steps_by_nin_status(status: list) -> dict:
     status = f"""{','.join([f'"{x}"' for x in status])}"""
     q = f"""
     query MyQuery {{
@@ -138,16 +142,16 @@ def get_flow_run_steps_by_nin_status(status: list):
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"]
 
 
-def get_flow_runs():
-    q = """
-    query MyQuery {
+def get_flow_runs(limit: int) -> dict:
+    q = f"""
+    query MyQuery {{
         flow_runs (
-            order_by: { id: desc }
-            limit: 25
-        ) {
+            order_by: {{ id: desc }}
+            limit: {limit}
+        ) {{
             id
             flow_id
-            flow_run_steps {
+            flow_run_steps {{
                 started_at
                 ended_at
                 status
@@ -155,8 +159,8 @@ def get_flow_runs():
                 pod_name
                 image
                 command
-            }
-        }
-    }
+            }}
+        }}
+    }}
     """
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_runs"]
