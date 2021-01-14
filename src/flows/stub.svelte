@@ -35,6 +35,6 @@
     {/if}
   </td>
   <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    <a on:click={() => router.route(`/flows/${flow_id}`, true)} class="text-indigo-600 hover:text-indigo-900">View</a>
+    <a on:click={() => router.route(`/flows/${flow_id}`, true)} class="text-indigo-600 hover:text-indigo-900 cursor-pointer">View</a>
   </td>
 </tr>

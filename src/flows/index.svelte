@@ -1,6 +1,6 @@
 <script>
-  import FlowStub from "./FlowStub.svelte"
-  import { flows } from "./stores.js"
+  import FlowStub from "./stub.svelte"
+  import { flows } from "../stores.js"
 
   export let router
 </script>

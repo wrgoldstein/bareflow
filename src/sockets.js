@@ -1,6 +1,3 @@
-import __SNOWPACK_ENV__ from '../__snowpack__/env.js';
-import.meta.env = __SNOWPACK_ENV__;
-
 import { flows, selected_run } from "./stores.js"
 
 

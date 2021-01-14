@@ -1,9 +1,10 @@
 <script>
   import { fade } from "svelte/transition"
-  import { flows, flow, flow_id, selected_run, selected_step_ix, selected_step } from "./stores.js";
-  import RunButton from "./RunButton.svelte"
-  import DockerTag from "./DockerTag.svelte"
-  import K8sTag from "./K8sTag.svelte"
+  
+  import { flows, flow, flow_id, selected_run, selected_step_ix, selected_step } from "../stores.js";
+  import RunButton from "../components/RunButton.svelte"
+  import DockerTag from "../components/DockerTag.svelte"
+  import K8sTag from "../components/K8sTag.svelte"
   // export let router
 
   let logs = {}
