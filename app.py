@@ -1,11 +1,11 @@
 import asyncio
 import json
 
-from aiofile import async_open
+import aiofiles
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
 
-from lib import service
+from lib import service, pod_log
 
 app = Sanic("bare_flow")
 app.static("/public", "./build")
@@ -47,15 +47,7 @@ async def index_with_route(request, flow):
 
 @app.route("/api/logs/<pod>")
 async def logs(request, pod):
-    async def main(res):
-        # TODO close request when pod is finished running
-        async with async_open(f"pod-logs/{pod}", "r") as afp:
-            while True:
-                line = await afp.readline()
-                if line != "":
-                    await res.write(line)
-
-    return response.stream(main)
+    return await pod_log.tail_log(pod)
 
 
 @app.route("/run/<flow_id>", methods=["POST"])
@@ -79,7 +71,7 @@ async def feed(request, ws):
     await register(ws)
     try:
         # Send initial flow details
-        await msg(ws, "flows", flows=service.get_flows())
+        await msg(ws, "initialize", **service.get_flows())
         async for message in ws:
             # We don't expect to receive any messages but this keeps the connection alive
             json.loads(message)

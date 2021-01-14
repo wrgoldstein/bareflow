@@ -23,7 +23,6 @@ def create_flow_run_and_steps(flow_id: str, steps: List[dict]) -> dict:
         insert_flow_runs_one(object: {{
             flow_run_steps: {{   data: [{flow_run_steps}] }},
             flow_id: "{flow_id}",
-            status: "created"
         }})
         {{
             id
@@ -84,9 +83,8 @@ def update_flow_run_step(flow_run_step_id: int, **kwargs) -> dict:
         }}
     }}
     """
-    return requests.post(url, json=dict(query=q)).json()["data"][
-        "update_flow_run_steps_by_pk"
-    ]
+    res = requests.post(url, json=dict(query=q)).json()
+    return res["data"]["update_flow_run_steps_by_pk"]
 
 
 def get_flow_run(flow_run_id: int, **kwargs) -> dict:

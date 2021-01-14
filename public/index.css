@@ -31,3 +31,7 @@
     background-position: 100% 100%;
   }
 }
+
+.slow {
+  animation: barberpole 4s linear infinite;
+}

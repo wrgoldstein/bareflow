@@ -100,7 +100,7 @@ async def wait_for_pod_status(pod_name: str, statuses: List[str]) -> str:
         await asyncio.sleep(3)
 
 
-async def update_step_and_report_status(flow_run_step_id: int, **kwargs):
+async def update_step(flow_run_step_id: int, **kwargs):
     flow_run_step = graphql.update_flow_run_step(flow_run_step_id, **kwargs)
     queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
 
@@ -111,7 +111,7 @@ async def run_step(step: dict):
     job = create_job_object(flow_run_step_id, params)
     batch_v1.create_namespaced_job(body=job, namespace="default")
     pod = await get_pod_for_job(job)
-    update_step_and_report_status(
+    await update_step(
         flow_run_step_id,
         pod_name=pod.metadata.name,
         status="started",
@@ -122,19 +122,19 @@ async def run_step(step: dict):
     status = await wait_for_pod_status(
         pod.metadata.name, ["Succeeded", "Failed", "Unknown", "Running"]
     )
-    update_step_and_report_status(flow_run_step_id, status=status.lower())
+    await update_step(flow_run_step_id, status=status.lower())
 
     # Tail the kubernetes log to a local file; this is tricky to do using the client library
     log = await asyncio.create_subprocess_shell(
         f"kubectl logs -n default {pod.metadata.name} --follow > pod-logs/{pod.metadata.name}"
     )
-    update_step_and_report_status(flow_run_step_id, log_status="local")
+    await update_step(flow_run_step_id, log_status="local")
 
     # wait for the pod to finish before terminating the log tailing subprocess
     status = await wait_for_pod_status(
         pod.metadata.name, ["Succeeded", "Failed", "Unknown"]
     )
-    update_step_and_report_status(
+    await update_step(
         flow_run_step_id, status=status.lower(), ended_at=datetime.now(timezone.utc)
     )
 
@@ -151,12 +151,12 @@ async def reattach_to_step(step: dict):
             f"kubectl logs -n default {pod_name} --follow > pod-logs/{pod_name}"
         )
         status = await wait_for_pod_status(pod_name, ["Succeeded", "Failed", "Unknown"])
-        update_step_and_report_status(step["id"], status=status.lower())
+        await update_step(step["id"], status=status.lower())
         log.terminate()
     else:
         # As far as we can tell this was never even started
         asyncio.create_task(run_step(step))
-        update_step_and_report_status(step["id"], status="queued")
+        await update_step(step["id"], status="queued")
 
 
 def get_flows() -> dict:
@@ -167,29 +167,11 @@ def get_flows() -> dict:
     which is shown in the index view.
     """
     flow_runs = graphql.get_flow_runs(25)
-    groups = {
-        k: list(v) for k, v in itertools.groupby(flow_runs, lambda x: x["flow_id"])
-    }
-    res = {}
-    for flow_id in flows.keys():
-        res[flow_id] = {"runs": []}
-        group = groups.get(flow_id, [])
-        for run in group:
-            durations = [
-                x
-                for x in [
-                    utils.parse_duration_from_step(step)
-                    for step in run["flow_run_steps"]
-                ]
-                if x
-            ]
-            succeeded = all(
-                [step["status"] == "succeeded" for step in run["flow_run_steps"]]
-            )
-            run["duration"] = sum(durations)
-            run["status"] = "succeeded" if succeeded else "failed"
-            res[flow_id]["runs"].append(run)
-    return res
+
+    # To make state management easier on the client, we do not nest
+    # run steps inside their runs.
+    flow_run_steps = [flow_run.pop("flow_run_steps") for flow_run in flow_runs]
+    return dict(flows=flows, flow_runs=flow_runs, flow_run_steps=flow_run_steps)
 
 
 async def scheduler():

@@ -11,11 +11,20 @@ logs in parallel.
     which will make other things way easier
 * need to give pod command and pod name fixed width, and put some space between steps
 
+later on:
+  did a big old cleanup!!!!
+
+in the middle of rewriting my logging logger (pod_log.py)
+i think some gating on the client side is a good idea (close a request to start a new one for logs)
+
 
 1/12/2021:
   need to implement logging with automatic rotation
   
-  in the middle of implementing a new view page for a flow.
+  [x] in the middle of implementing a new view page for a flow.
+
+  TIME FOR BED
+    => in the middle of rewriting the state updating logic using more generic deep merging
 
 
 -----------------------------------------------------------

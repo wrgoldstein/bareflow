@@ -1,4 +1,4 @@
-<span class="h-8 items-center flex bg-grey-500 border rounded p-1">
+<span class="h-8 items-center flex bg-grey-500 border border-lg rounded p-1 inline-flex pl-1 pr-1">
   <svg width=24 color="grey" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <title>Docker icon</title>
       <path style="fill: grey;"
