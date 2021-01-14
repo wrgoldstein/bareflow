@@ -13,9 +13,9 @@ from pathlib import Path
 
 from kubernetes import client, config, watch
 
-import graphql
-import utils
-from flow import flows
+from . import graphql
+from . import utils
+from .flow import flows
 
 queue = None
 

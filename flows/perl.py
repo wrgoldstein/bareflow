@@ -2,7 +2,7 @@
 this flow prints the first few digits of pi, twice.
 """
 
-from flow import step
+from lib.flow import step
 
 step(
     flow_id="pi-flow",

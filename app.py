@@ -5,7 +5,7 @@ from aiofile import async_open
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
 
-import service
+from lib import service
 
 app = Sanic("bare_flow")
 app.static("/public", "./build")
