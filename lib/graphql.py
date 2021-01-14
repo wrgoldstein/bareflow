@@ -12,33 +12,41 @@ def create_flow_run_and_steps(flow_id: str, steps: List[dict]) -> dict:
         name = step["name"]
         image = step["image"]
         command = step["command"]
-        flow_run_step = f'{{ name: "{name}", image: "{image}", command: {json.dumps(command)},  status: "created" }}'
+        depends_on = step["depends_on"]
+        flow_run_step = f"""
+        {{ name: "{name}", depends_on: {json.dumps(depends_on)}, image: "{image}", command: {json.dumps(command)},  status: "created" }}
+        """
 
         flow_run_steps.append(flow_run_step)
 
     flow_run_steps = ",\n".join(flow_run_steps)
 
     q = f"""
-    mutation MyMutation {{
-        insert_flow_runs_one(object: {{
-            flow_run_steps: {{   data: [{flow_run_steps}] }},
-            flow_id: "{flow_id}",
-        }})
-        {{
-            id
-            created_at
-            flow_id
-            flow_run_steps {{
-                id
-                name
-                image
-                command
-                status
+            mutation CreateRun {{
+            insert_flow_runs(objects: [
+                {{ 
+                    flow_id: "{flow_id}", 
+                    flow_run_steps: {{
+                        data: [{flow_run_steps}]
+                    }} 
+                }}]) 
+                {{
+                returning {{
+                    id
+                    flow_id
+                    flow_run_steps {{
+                        id
+                        flow_run_id
+                        name
+                        image
+                        command
+                        status
+                    }}
+                }}
             }}
         }}
-    }}
     """
-    return requests.post(url, json=dict(query=q)).json()["data"]["insert_flow_runs_one"]
+    return requests.post(url, json=dict(query=q)).json()["data"]["insert_flow_runs"]["returning"]
 
 
 def update_flow_run(flow_run_id: int, **kwargs) -> dict:
@@ -53,6 +61,7 @@ def update_flow_run(flow_run_id: int, **kwargs) -> dict:
             _set: {{ {_set} }}
         ) {{
             id
+            flow_id
             status
         }}
     }}
@@ -72,7 +81,11 @@ def update_flow_run_step(flow_run_step_id: int, **kwargs) -> dict:
             _set: {{ {_set} }}
         ) {{
             id
+            name
+            flow_run_id
             status
+            image
+            command
             pod_name
             started_at
             ended_at
@@ -100,6 +113,10 @@ def get_flow_run(flow_run_id: int, **kwargs) -> dict:
                 ended_at
                 flow_run_steps {{
                     id
+                    name
+                    flow_run_id
+                    image
+                    command
                     pod_name
                     status
                 }}
@@ -113,6 +130,9 @@ def get_flow_run_step(flow_run_step_id: int) -> dict:
     q = f"""
     query MyQuery {{
         flow_run_steps(where: {{ id: {{_eq: {flow_run_step_id}  }}  }}) {{
+            id
+            name
+            flow_run_id
             command
             image
             pod_name
@@ -129,6 +149,7 @@ def get_flow_run_steps_by_nin_status(status: list) -> dict:
     query MyQuery {{
         flow_run_steps(where: {{status: {{_nin: [{status}] }} }}) {{
             id
+            flow_run_id
             name
             image
             status
@@ -150,6 +171,8 @@ def get_flow_runs(limit: int) -> dict:
             id
             flow_id
             flow_run_steps {{
+                id
+                flow_run_id
                 started_at
                 ended_at
                 status

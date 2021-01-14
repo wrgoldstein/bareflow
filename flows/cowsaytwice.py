@@ -4,7 +4,7 @@ step(
     flow_id="cowsaytwice",
     name="whalesay",  # no underscores
     image="docker/whalesay",
-    command=["cowsay", "better mortgage so fun"],
+    command=["cowsay", "better mortgage so fun"]
     # schedule="0 */2 * * *"
 )
 
@@ -13,5 +13,6 @@ step(
     name="whalesay-again",  # no underscores
     image="docker/whalesay",
     command=["cowsay", "oh gosh number two"],
+    depends_on=["whalesay"]
     # schedule="0 */2 * * *"
 )

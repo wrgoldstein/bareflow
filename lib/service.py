@@ -107,7 +107,7 @@ async def update_step(flow_run_step_id: int, **kwargs):
 
 async def run_step(step: dict):
     flow_run_step_id = step.pop("id")
-    params = {k: v for k, v in step.items() if k not in ["status", "pod_name"]}
+    params = {k: v for k, v in step.items() if k not in ["status", "pod_name", "flow_run_id"]}
     job = create_job_object(flow_run_step_id, params)
     batch_v1.create_namespaced_job(body=job, namespace="default")
     pod = await get_pod_for_job(job)
@@ -170,7 +170,7 @@ def get_flows() -> dict:
 
     # To make state management easier on the client, we do not nest
     # run steps inside their runs.
-    flow_run_steps = [flow_run.pop("flow_run_steps") for flow_run in flow_runs]
+    flow_run_steps = [flat for arr in [flow_run.pop("flow_run_steps") for flow_run in flow_runs] for flat in arr]
     return dict(flows=flows, flow_runs=flow_runs, flow_run_steps=flow_run_steps)
 
 

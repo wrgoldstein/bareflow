@@ -5,7 +5,7 @@
   import FlowIndex from "./flows/index.svelte"
   import FlowView from "./flows/view.svelte"
 
-  import { flows, page, flow_id, selected_run } from "./stores.js"
+  import { page } from "./stores.js"
   import { socket } from "./sockets.js"
   import { router } from "./routes.js"
 

@@ -1,5 +1,5 @@
 <script>  
-  import { flows, flow, flow_id, selected_run, selected_step_ix, selected_step } from "../stores.js";
+  import { state, derived_state, update_state, update_flow_runs, update_flow_run_steps } from "../stores.js";
   import RunButton from "../components/RunButton.svelte"
   import DockerTag from "../components/DockerTag.svelte"
   import K8sTag from "../components/K8sTag.svelte"
@@ -21,15 +21,20 @@
     // This function is run when the user clicks the big "Run"
     // button for the Flow. It signals that the steps should be
     // scheduled on kubernetes, and the logs subscribed to.
-    const res = await fetch(`/run/${$flow_id}`, { method: "POST" }).then(r => r.json())
+    const res = await fetch(`/run/${$state.flow_id}`, { method: "POST" }).then(r => r.json())
+    console.log(res)
+    const [{ flow_run_steps, ...flow_run }] = res
+
+    update_flow_runs([flow_run])
+    update_flow_run_steps(flow_run_steps)
 
     const interval = setInterval(() => {
       // sometimes the event containing the run can be 
       // beaten by the response, so we make sure to wait
       // for the run to be in our store before selecting it
-      if ($flow.runs.map(r => r.id).includes(res.id)) {
+      if ($derived_state.flow_runs.map(r => r.id).includes(res.id)) {
           clearInterval(interval)
-          select_run(res.id)()
+          select_run(flow_run.id)()
         }
       }, 100
     )
@@ -45,8 +50,7 @@
     // a function which can be called with no arguments, which
     // makes on:click directives less verbose.
     return () => {
-      selected_run.set($flow.runs.find(r => r.id == id))
-      selected_step_ix.set(0)
+      update_state({ flow_run_id: id })
     }
   }
 
@@ -55,7 +59,6 @@
     // to a variable here keyed on the pod (todo)
     if (pod == undefined ) return
     if (reading_logs_for.has(pod)) {
-      console.log("duplicate request for logging")
       return
     }
     reading_logs_for.add(pod)
@@ -69,54 +72,16 @@
     reading_logs_for.delete(pod)
   };
 
-  flow.subscribe( (f) => {
-    // This sets the "selected run" to the last one if
-    // it isn't already set. This allows us to auto focus
-    // on page load and when the first run is kicked off.
-    if (f == undefined) return
-    if ($selected_run != undefined){
-      selected_run.set($flow.runs[$flow.runs.length - 1])
-    }
-    selected_run.set(f.runs[f.runs.length - 1])
-  })
-
-  selected_run.subscribe(async (run) => {
-    // if the run has changed, refocus on its first step
-    // rather than whatever step of the last run we were
-    // looking at
-    if (run == undefined) return
-    selected_step.set(run.flow_run_steps[0])
-  })
-
-  selected_step_ix.subscribe(async (ix) => {
-    // sort of annoying but because runs just have steps in an array
-    // we need to keep track of the index AND the actual step
-    // that has been selected
-    if ($selected_run == undefined || $selected_run.flow_run_steps == undefined) return
-    selected_step.set($selected_run.flow_run_steps[ix])
-  })
-
-  selected_step.subscribe(async (step) => {
-    // When the selected step changes, make sure we've asked for
-    // the logs for that step
-    if (step == undefined) return  // the first update is always undefined
-    if (step.pod_name == undefined) return // we don't know the pod yet
-    if (logs[step.pod_name]) return
-    logs[step.pod_name] = ""
-    await showLogs(step.pod_name)
-  })
-
-  $: runs = $flow && $flow.runs || []
 </script>
 
-{#if $flow}
+{#if $derived_state.flow}
   <!-- header -->
   <div class="lg:flex lg:items-center lg:justify-between pb-4">
     <div class="flex-1 min-w-0">
       <h2
         class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl
         sm:truncate">
-        {$flow_id}
+        {$state.flow_id}
       </h2>
     </div>
     <div class="mt-5 flex lg:mt-0 lg:ml-4">
@@ -124,37 +89,33 @@
     </div>
   </div>
 
-  <!-- run history -->
-  {#if $flow.runs.length > 0 }
-    <!-- {console.log($flow.runs)} -->
+  <!-- For historical runs, show a colored badge showing its status -->
+  {#if $derived_state.flow_runs.length > 0 }
     <div class="flex mb-4">
-      {#key $flows}
-        {#each $flow.runs as run}
-          {#if run.flow_run_steps}
-            <div on:click={select_run(run.id)} class="cursor-pointer border rounded m-1 {$selected_run.id == run.id ? 'ring-4 ring-inset ring-gray-200' : ''}">
-              {#each run.flow_run_steps as step}
-                  <div class="p-1 h-4 w-4 m-1 {colors[step.status]}"></div>
-              {/each}
-            </div>
-          {/if}
-        {/each}
-      {/key}
+      {#each $derived_state.flow_runs as run}
+        <div on:click={select_run(run.id)} class="cursor-pointer border rounded m-1 {$state.flow_run_id == run.id ? 'ring-4 ring-inset ring-gray-200' : ''}">
+          {#each $derived_state.flow_run_steps.filter(s => s.flow_run_id == run.id) as step}
+              <div class="p-1 h-4 w-4 m-1 {colors[step.status]}"></div>
+          {/each}
+        </div>
+      {/each}
     </div>
   {:else}
     <div>No runs to show</div>
   {/if}
 
-  {#if $selected_run && $selected_run.flow_run_steps}
+  <!-- For each step of the flow run, show more detail -->
+  {#if $derived_state.flow_run_steps && $state.flow_run_id}
     Steps:
     <ol class="pt-3 border-t pb-3 border-b">
-      {#each $selected_run.flow_run_steps as step, i}
+      {#each $derived_state.flow_run_steps.filter(s => s.flow_run_id == $state.flow_run_id) as step, i}
         <li>
-          <div class="grid grid-cols-5 items-center justify-around">
-            <div class="text-center ml-2">{step.name}</div>
-            <div class="text-center ml-2">
+          <div class="grid grid-cols-7 items-center justify-around">
+            <div class="text-left ml-2 col-span-1">{step.name}</div>
+            <div class="text-center ml-2 col-span-1">
               <DockerTag>{step.image}</DockerTag>
             </div>
-            <div class="text-center ml-2">
+            <div class="text-left ml-2 col-span-2">
               <span class="font-mono text-xs whitespace-nowrap">{JSON.stringify(step.command)}</span>
             </div>
             <div class="flex flex-col items-center">
@@ -162,8 +123,8 @@
                 {step.status || 'created' }
               </span>
             </div>
-            <div class="text-center ml-2">
-              <K8sTag>{step.pod_name || 'not assigned'}</K8sTag>
+            <div class="col-span-2 text-center ml-2 text-xs overflow-hidden whitespace-nobreak">
+              <K8sTag pod_name={step.pod_name || 'not assigned'} />
             </div>
           </div>
         </li>
@@ -171,12 +132,12 @@
     </ol>
   {/if}
 
-  <!-- log output -->
+  <!-- If we have a selected flow run step and there is log content for it, show the log. -->
   <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-      {#key $selected_step}
-        {#if $selected_step && $selected_step.pod_name && logs[$selected_step.pod_name]}
-          <pre class="whitespace-pre-wrap">{logs[$selected_step.pod_name]}</pre>
+      {#key $derived_state.flow_run_step}
+        {#if $derived_state.flow_run_step && $derived_state.flow_run_step.pod_name && logs[$derived_state.flow_run_step.pod_name]}
+          <pre class="whitespace-pre-wrap">{logs[$derived_state.flow_run_step.pod_name]}</pre>
         {/if}
       {/key}
     </div>
