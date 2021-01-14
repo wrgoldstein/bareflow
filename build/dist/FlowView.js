@@ -43,24 +43,24 @@ import K8sTag from "./K8sTag.js";
 
 function get_each_context(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[13] = list[i];
-	child_ctx[15] = i;
+	child_ctx[14] = list[i];
+	child_ctx[16] = i;
 	return child_ctx;
 }
 
 function get_each_context_1(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[16] = list[i];
+	child_ctx[17] = list[i];
 	return child_ctx;
 }
 
 function get_each_context_2(ctx, list, i) {
 	const child_ctx = ctx.slice();
-	child_ctx[13] = list[i];
+	child_ctx[14] = list[i];
 	return child_ctx;
 }
 
-// (189:0) {:else}
+// (196:0) {:else}
 function create_else_block_1(ctx) {
 	let t;
 
@@ -80,7 +80,7 @@ function create_else_block_1(ctx) {
 	};
 }
 
-// (113:0) {#if $flow}
+// (120:0) {#if $flow}
 function create_if_block(ctx) {
 	let div2;
 	let div0;
@@ -222,7 +222,7 @@ function create_if_block(ctx) {
 	};
 }
 
-// (144:2) {:else}
+// (151:2) {:else}
 function create_else_block(ctx) {
 	let div;
 
@@ -241,7 +241,7 @@ function create_else_block(ctx) {
 	};
 }
 
-// (129:2) {#if $flow.runs.length > 0 }
+// (136:2) {#if $flow.runs.length > 0 }
 function create_if_block_3(ctx) {
 	let div;
 	let previous_key = /*$flows*/ ctx[4];
@@ -274,14 +274,14 @@ function create_if_block_3(ctx) {
 	};
 }
 
-// (134:10) {#if run.flow_run_steps}
+// (141:10) {#if run.flow_run_steps}
 function create_if_block_4(ctx) {
 	let div;
 	let t;
 	let div_class_value;
 	let mounted;
 	let dispose;
-	let each_value_2 = /*run*/ ctx[16].flow_run_steps;
+	let each_value_2 = /*run*/ ctx[17].flow_run_steps;
 	let each_blocks = [];
 
 	for (let i = 0; i < each_value_2.length; i += 1) {
@@ -298,7 +298,7 @@ function create_if_block_4(ctx) {
 
 			t = space();
 
-			attr(div, "class", div_class_value = "cursor-pointer border rounded m-1 " + (/*$selected_run*/ ctx[3].id == /*run*/ ctx[16].id
+			attr(div, "class", div_class_value = "cursor-pointer border rounded m-1 " + (/*$selected_run*/ ctx[3].id == /*run*/ ctx[17].id
 			? "ring-4 ring-inset ring-gray-200"
 			: ""));
 		},
@@ -313,7 +313,7 @@ function create_if_block_4(ctx) {
 
 			if (!mounted) {
 				dispose = listen(div, "click", function () {
-					if (is_function(/*select_run*/ ctx[9](/*run*/ ctx[16].id))) /*select_run*/ ctx[9](/*run*/ ctx[16].id).apply(this, arguments);
+					if (is_function(/*select_run*/ ctx[9](/*run*/ ctx[17].id))) /*select_run*/ ctx[9](/*run*/ ctx[17].id).apply(this, arguments);
 				});
 
 				mounted = true;
@@ -323,7 +323,7 @@ function create_if_block_4(ctx) {
 			ctx = new_ctx;
 
 			if (dirty & /*colors, $flow*/ 129) {
-				each_value_2 = /*run*/ ctx[16].flow_run_steps;
+				each_value_2 = /*run*/ ctx[17].flow_run_steps;
 				let i;
 
 				for (i = 0; i < each_value_2.length; i += 1) {
@@ -345,7 +345,7 @@ function create_if_block_4(ctx) {
 				each_blocks.length = each_value_2.length;
 			}
 
-			if (dirty & /*$selected_run, $flow*/ 9 && div_class_value !== (div_class_value = "cursor-pointer border rounded m-1 " + (/*$selected_run*/ ctx[3].id == /*run*/ ctx[16].id
+			if (dirty & /*$selected_run, $flow*/ 9 && div_class_value !== (div_class_value = "cursor-pointer border rounded m-1 " + (/*$selected_run*/ ctx[3].id == /*run*/ ctx[17].id
 			? "ring-4 ring-inset ring-gray-200"
 			: ""))) {
 				attr(div, "class", div_class_value);
@@ -360,7 +360,7 @@ function create_if_block_4(ctx) {
 	};
 }
 
-// (136:14) {#each run.flow_run_steps as step}
+// (143:14) {#each run.flow_run_steps as step}
 function create_each_block_2(ctx) {
 	let div;
 	let div_class_value;
@@ -368,13 +368,13 @@ function create_each_block_2(ctx) {
 	return {
 		c() {
 			div = element("div");
-			attr(div, "class", div_class_value = "p-1 h-4 w-4 m-1 " + /*colors*/ ctx[7][/*step*/ ctx[13].status]);
+			attr(div, "class", div_class_value = "p-1 h-4 w-4 m-1 " + /*colors*/ ctx[7][/*step*/ ctx[14].status]);
 		},
 		m(target, anchor) {
 			insert(target, div, anchor);
 		},
 		p(ctx, dirty) {
-			if (dirty & /*$flow*/ 1 && div_class_value !== (div_class_value = "p-1 h-4 w-4 m-1 " + /*colors*/ ctx[7][/*step*/ ctx[13].status])) {
+			if (dirty & /*$flow*/ 1 && div_class_value !== (div_class_value = "p-1 h-4 w-4 m-1 " + /*colors*/ ctx[7][/*step*/ ctx[14].status])) {
 				attr(div, "class", div_class_value);
 			}
 		},
@@ -384,10 +384,10 @@ function create_each_block_2(ctx) {
 	};
 }
 
-// (133:8) {#each $flow.runs as run}
+// (140:8) {#each $flow.runs as run}
 function create_each_block_1(ctx) {
 	let if_block_anchor;
-	let if_block = /*run*/ ctx[16].flow_run_steps && create_if_block_4(ctx);
+	let if_block = /*run*/ ctx[17].flow_run_steps && create_if_block_4(ctx);
 
 	return {
 		c() {
@@ -399,7 +399,7 @@ function create_each_block_1(ctx) {
 			insert(target, if_block_anchor, anchor);
 		},
 		p(ctx, dirty) {
-			if (/*run*/ ctx[16].flow_run_steps) {
+			if (/*run*/ ctx[17].flow_run_steps) {
 				if (if_block) {
 					if_block.p(ctx, dirty);
 				} else {
@@ -419,7 +419,7 @@ function create_each_block_1(ctx) {
 	};
 }
 
-// (132:6) {#key $flows}
+// (139:6) {#key $flows}
 function create_key_block_1(ctx) {
 	let each_1_anchor;
 	let each_value_1 = /*$flow*/ ctx[0].runs;
@@ -475,7 +475,7 @@ function create_key_block_1(ctx) {
 	};
 }
 
-// (148:2) {#if $selected_run && $selected_run.flow_run_steps}
+// (155:2) {#if $selected_run && $selected_run.flow_run_steps}
 function create_if_block_2(ctx) {
 	let t;
 	let ol;
@@ -566,9 +566,9 @@ function create_if_block_2(ctx) {
 	};
 }
 
-// (157:14) <DockerTag>
+// (164:14) <DockerTag>
 function create_default_slot_1(ctx) {
-	let t_value = /*step*/ ctx[13].image + "";
+	let t_value = /*step*/ ctx[14].image + "";
 	let t;
 
 	return {
@@ -579,7 +579,7 @@ function create_default_slot_1(ctx) {
 			insert(target, t, anchor);
 		},
 		p(ctx, dirty) {
-			if (dirty & /*$selected_run*/ 8 && t_value !== (t_value = /*step*/ ctx[13].image + "")) set_data(t, t_value);
+			if (dirty & /*$selected_run*/ 8 && t_value !== (t_value = /*step*/ ctx[14].image + "")) set_data(t, t_value);
 		},
 		d(detaching) {
 			if (detaching) detach(t);
@@ -587,9 +587,9 @@ function create_default_slot_1(ctx) {
 	};
 }
 
-// (171:14) <K8sTag>
+// (178:14) <K8sTag>
 function create_default_slot(ctx) {
-	let t_value = (/*step*/ ctx[13].pod_name || "not assigned") + "";
+	let t_value = (/*step*/ ctx[14].pod_name || "not assigned") + "";
 	let t;
 
 	return {
@@ -600,7 +600,7 @@ function create_default_slot(ctx) {
 			insert(target, t, anchor);
 		},
 		p(ctx, dirty) {
-			if (dirty & /*$selected_run*/ 8 && t_value !== (t_value = (/*step*/ ctx[13].pod_name || "not assigned") + "")) set_data(t, t_value);
+			if (dirty & /*$selected_run*/ 8 && t_value !== (t_value = (/*step*/ ctx[14].pod_name || "not assigned") + "")) set_data(t, t_value);
 		},
 		d(detaching) {
 			if (detaching) detach(t);
@@ -608,12 +608,12 @@ function create_default_slot(ctx) {
 	};
 }
 
-// (151:6) {#each $selected_run.flow_run_steps as step, i}
+// (158:6) {#each $selected_run.flow_run_steps as step, i}
 function create_each_block(ctx) {
 	let li;
 	let div9;
 	let div0;
-	let t0_value = /*step*/ ctx[13].name + "";
+	let t0_value = /*step*/ ctx[14].name + "";
 	let t0;
 	let t1;
 	let div2;
@@ -624,14 +624,14 @@ function create_each_block(ctx) {
 	let div4;
 	let div3;
 	let t6;
-	let t7_value = JSON.stringify(/*step*/ ctx[13].command) + "";
+	let t7_value = JSON.stringify(/*step*/ ctx[14].command) + "";
 	let t7;
 	let t8;
 	let div6;
 	let div5;
 	let t10;
 	let span;
-	let t11_value = (/*step*/ ctx[13].status || "created") + "";
+	let t11_value = (/*step*/ ctx[14].status || "created") + "";
 	let t11;
 	let span_class_value;
 	let t12;
@@ -695,8 +695,8 @@ function create_each_block(ctx) {
 			attr(div4, "class", "text-center ml-2");
 			attr(div5, "class", "text-xs uppercase text-gray-500");
 
-			attr(span, "class", span_class_value = "text-center text-xs text-white p-1 pl-2 pr-2 ml-2 rounded bg-opacity-30 " + (/*step*/ ctx[13].status
-			? /*slowColors*/ ctx[6][/*step*/ ctx[13].status]
+			attr(span, "class", span_class_value = "text-center text-xs text-white p-1 pl-2 pr-2 ml-2 rounded bg-opacity-30 " + (/*step*/ ctx[14].status
+			? /*slowColors*/ ctx[6][/*step*/ ctx[14].status]
 			: /*slowColors*/ ctx[6].created));
 
 			attr(div6, "class", "flex flex-col items-center");
@@ -734,26 +734,26 @@ function create_each_block(ctx) {
 			current = true;
 		},
 		p(ctx, dirty) {
-			if ((!current || dirty & /*$selected_run*/ 8) && t0_value !== (t0_value = /*step*/ ctx[13].name + "")) set_data(t0, t0_value);
+			if ((!current || dirty & /*$selected_run*/ 8) && t0_value !== (t0_value = /*step*/ ctx[14].name + "")) set_data(t0, t0_value);
 			const dockertag_changes = {};
 
-			if (dirty & /*$$scope, $selected_run*/ 2097160) {
+			if (dirty & /*$$scope, $selected_run*/ 4194312) {
 				dockertag_changes.$$scope = { dirty, ctx };
 			}
 
 			dockertag.$set(dockertag_changes);
-			if ((!current || dirty & /*$selected_run*/ 8) && t7_value !== (t7_value = JSON.stringify(/*step*/ ctx[13].command) + "")) set_data(t7, t7_value);
-			if ((!current || dirty & /*$selected_run*/ 8) && t11_value !== (t11_value = (/*step*/ ctx[13].status || "created") + "")) set_data(t11, t11_value);
+			if ((!current || dirty & /*$selected_run*/ 8) && t7_value !== (t7_value = JSON.stringify(/*step*/ ctx[14].command) + "")) set_data(t7, t7_value);
+			if ((!current || dirty & /*$selected_run*/ 8) && t11_value !== (t11_value = (/*step*/ ctx[14].status || "created") + "")) set_data(t11, t11_value);
 
-			if (!current || dirty & /*$selected_run*/ 8 && span_class_value !== (span_class_value = "text-center text-xs text-white p-1 pl-2 pr-2 ml-2 rounded bg-opacity-30 " + (/*step*/ ctx[13].status
-			? /*slowColors*/ ctx[6][/*step*/ ctx[13].status]
+			if (!current || dirty & /*$selected_run*/ 8 && span_class_value !== (span_class_value = "text-center text-xs text-white p-1 pl-2 pr-2 ml-2 rounded bg-opacity-30 " + (/*step*/ ctx[14].status
+			? /*slowColors*/ ctx[6][/*step*/ ctx[14].status]
 			: /*slowColors*/ ctx[6].created))) {
 				attr(span, "class", span_class_value);
 			}
 
 			const k8stag_changes = {};
 
-			if (dirty & /*$$scope, $selected_run*/ 2097160) {
+			if (dirty & /*$$scope, $selected_run*/ 4194312) {
 				k8stag_changes.$$scope = { dirty, ctx };
 			}
 
@@ -778,7 +778,7 @@ function create_each_block(ctx) {
 	};
 }
 
-// (183:8) {#if $selected_step && $selected_step.pod_name && logs[$selected_step.pod_name]}
+// (190:8) {#if $selected_step && $selected_step.pod_name && logs[$selected_step.pod_name]}
 function create_if_block_1(ctx) {
 	let pre;
 	let t_value = /*logs*/ ctx[1][/*$selected_step*/ ctx[5].pod_name] + "";
@@ -803,7 +803,7 @@ function create_if_block_1(ctx) {
 	};
 }
 
-// (182:6) {#key $selected_step}
+// (189:6) {#key $selected_step}
 function create_key_block(ctx) {
 	let if_block_anchor;
 	let if_block = /*$selected_step*/ ctx[5] && /*$selected_step*/ ctx[5].pod_name && /*logs*/ ctx[1][/*$selected_step*/ ctx[5].pod_name] && create_if_block_1(ctx);
@@ -920,6 +920,7 @@ function instance($$self, $$props, $$invalidate) {
 	component_subscribe($$self, flows, $$value => $$invalidate(4, $flows = $$value));
 	component_subscribe($$self, selected_step, $$value => $$invalidate(5, $selected_step = $$value));
 	let logs = {};
+	let reading_logs_for = new Set();
 	let uint8array = new TextDecoder("utf-8");
 
 	let slowColors = {
@@ -977,8 +978,14 @@ function instance($$self, $$props, $$invalidate) {
 	const showLogs = async pod => {
 		// This function streams the pod logs from the disk
 		// to a variable here keyed on the pod (todo)
-		console.log("lookin for ", pod);
+		if (pod == undefined) return;
 
+		if (reading_logs_for.has(pod)) {
+			console.log("duplicate request for logging");
+			return;
+		}
+
+		reading_logs_for.add(pod);
 		const response = await fetch(`/api/logs/${pod}`);
 		const reader = response.body.getReader();
 
@@ -987,6 +994,8 @@ function instance($$self, $$props, $$invalidate) {
 			$$invalidate(1, logs[pod] += uint8array.decode(value) + "\n", logs);
 			if (done) break;
 		}
+
+		reading_logs_for.delete(pod);
 	};
 
 	flow.subscribe(f => {
@@ -1014,7 +1023,7 @@ function instance($$self, $$props, $$invalidate) {
 		// that has been selected
 		if ($selected_run == undefined || $selected_run.flow_run_steps == undefined) return;
 
-		selected_step.set($selected_run.flow_run_steps[step]);
+		selected_step.set($selected_run.flow_run_steps[ix]);
 	});
 
 	selected_step.subscribe(async step => {

@@ -7,6 +7,7 @@
   // export let router
 
   let logs = {}
+  let reading_logs_for = new Set()
   let uint8array = new TextDecoder("utf-8");
 
   let slowColors = {
@@ -62,7 +63,12 @@
   const showLogs = async (pod) => {
     // This function streams the pod logs from the disk
     // to a variable here keyed on the pod (todo)
-    console.log("lookin for ", pod)
+    if (pod == undefined ) return
+    if (reading_logs_for.has(pod)) {
+      console.log("duplicate request for logging")
+      return
+    }
+    reading_logs_for.add(pod)
     const response = await fetch(`/api/logs/${pod}`)
     const reader = response.body.getReader()
     while (true){
@@ -70,6 +76,7 @@
       logs[pod] += uint8array.decode(value) + "\n"
       if (done) break;
     }
+    reading_logs_for.delete(pod)
   };
 
   flow.subscribe( (f) => {
@@ -94,7 +101,7 @@
     // we need to keep track of the index AND the actual step
     // that has been selected
     if ($selected_run == undefined || $selected_run.flow_run_steps == undefined) return
-    selected_step.set($selected_run.flow_run_steps[step])
+    selected_step.set($selected_run.flow_run_steps[ix])
   })
 
   selected_step.subscribe(async (step) => {

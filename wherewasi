@@ -1,14 +1,18 @@
-1/11/2021:
-  In the middle of transmogrifying things to use flow_run_steps intead of the flow_run itself for state.
-  
-  Next will need to make sure the watcher.py does what it should (write logs, track state in the db)
-    * also minimize repetitive writes by comparing the state in the db
-  
-  Then figure out how to expose the state in a live way to the client (either a long streaming GET or websockets)
 
-  
+1/13/2010:
+the ui is getting there
+
+* need to implement choosing a run to look at (see diagram below)
+* need to reimplement sending logs, maybe gate the number of logs being
+streamed at any time. aiofile is throwing weird errors when I ask for a few
+logs in parallel.
+* need to implement at least doing the steps in order if not actual daggyness
+  * that means steps need IDs and can be identified with something other than an index
+    which will make other things way easier
+* need to give pod command and pod name fixed width, and put some space between steps
 
 
+1/12/2021:
   need to implement logging with automatic rotation
   
   in the middle of implementing a new view page for a flow.
@@ -53,3 +57,15 @@ Next would be:
   Longer running job?
   Using private images?
   Easy linking to logdna / papertrail / whatever?
+
+
+
+1/11/2021:
+  In the middle of transmogrifying things to use flow_run_steps intead of the flow_run itself for state.
+  
+  Next will need to make sure the watcher.py does what it should (write logs, track state in the db)
+    * also minimize repetitive writes by comparing the state in the db
+  
+  Then figure out how to expose the state in a live way to the client (either a long streaming GET or websockets)
+
+  
