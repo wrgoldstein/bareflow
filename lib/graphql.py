@@ -154,10 +154,33 @@ def get_flow_run_steps_by_nin_status(status: list) -> dict:
             image
             status
             pod_name
+            depends_on
             command
         }}
     }}
     """
+    return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"]
+
+def get_flow_run_steps_by_run_id_and_name(flow_run_id: int, flow_run_step_names: str):
+    q = f"""
+    query MyQuery {{
+        flow_run_steps(where: {{
+            flow_run_id: {{ _eq: {flow_run_id} }}
+            name: {{_in: {json.dumps(flow_run_step_names)} }}
+        }}) 
+        {{
+            id
+            flow_run_id
+            name
+            image
+            status
+            pod_name
+            depends_on
+            command
+        }}
+    }}
+    """
+
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"]
 
 

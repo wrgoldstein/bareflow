@@ -11,10 +11,15 @@
 
   let colors = {
     created: 'bg-gray-500',
-    started: 'stripe-green',
+    pending: 'bg-brown-500',
+    starting: 'animated-stripe-green',
+    running: 'animated-stripe-green',
     succeeded: 'bg-green-500',
     failed: 'bg-red-500',
-    queued: 'stripe-yellow'
+    skipped: 'bg-red-800',
+    pending: 'animated-stripe-yellow',
+    queued: 'animated-stripe-yellow',
+    [undefined]: 'animated-stripe-yellow'
   }
 
   const runFlow = async () => {
@@ -110,7 +115,7 @@
     <ol class="pt-3 border-t pb-3 border-b">
       {#each $derived_state.flow_run_steps.filter(s => s.flow_run_id == $state.flow_run_id) as step, i}
         <li>
-          <div class="grid grid-cols-7 items-center justify-around">
+          <div class="grid grid-cols-8 items-center justify-around">
             <div class="text-left ml-2 col-span-1">{step.name}</div>
             <div class="text-center ml-2 col-span-1">
               <DockerTag>{step.image}</DockerTag>
@@ -119,19 +124,22 @@
               <span class="font-mono text-xs whitespace-nowrap">{JSON.stringify(step.command)}</span>
             </div>
             <div class="flex flex-col items-center">
-              <span class="text-center text-xs text-white p-1 pl-2 pr-2 ml-2 rounded slow {step.status ? colors[step.status] : colors.created }">
-                {step.status || 'created' }
+              <span class="w-36 text-center text-xs text-white p-1 pl-2 pr-2 ml-2 rounded slow {colors[step.status] }">
+                {step.status || 'pending' }
               </span>
             </div>
             <div class="col-span-2 text-center ml-2 text-xs overflow-hidden whitespace-nobreak">
               <K8sTag pod_name={step.pod_name || 'not assigned'} />
             </div>
+            <button on:click={viewDetails(step)} class="
+              cursor-pointer border rounded pt-2 pb-2 text-center ml-2 text-xs overflow-hidden whitespace-nobreak">
+              view details
+            </button>
           </div>
         </li>
       {/each}
     </ol>
   {/if}
-
   <!-- If we have a selected flow run step and there is log content for it, show the log. -->
   <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">

@@ -5,7 +5,7 @@ including creating jobs and keeping tabs on pod status and log output.
 
 import asyncio
 import importlib.util
-import itertools
+import json
 import uuid
 from typing import List
 from datetime import datetime, timezone
@@ -17,7 +17,7 @@ from . import graphql
 from . import utils
 from .flow import flows
 
-queue = None
+queue = None  # set by app.py to be on the same loop as the web server
 
 # Load all dags.. this should be more dynamical
 paths = Path("flows").glob("*.py")  # TODO nested
@@ -29,7 +29,7 @@ for path in paths:
 
 async def schedule_flow(flow_id: str, flow: dict):
     flow_run = graphql.create_flow_run_and_steps(flow_id, flow["steps"])
-    queue.put_nowait({"type": "event", "flow_run": flow_run})
+    queue.put_nowait({"source": "scheduler_flow", "type": "event", "flow_run": flow_run})
     return flow_run
 
 
@@ -102,19 +102,20 @@ async def wait_for_pod_status(pod_name: str, statuses: List[str]) -> str:
 
 async def update_step(flow_run_step_id: int, **kwargs):
     flow_run_step = graphql.update_flow_run_step(flow_run_step_id, **kwargs)
-    queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
+    queue.put_nowait({"source": "update_step", "type": "event", "flow_run_step": flow_run_step})
 
 
 async def run_step(step: dict):
     flow_run_step_id = step.pop("id")
-    params = {k: v for k, v in step.items() if k not in ["status", "pod_name", "flow_run_id"]}
+    await update_step(flow_run_step_id, status="starting")
+    params = {k: v for k, v in step.items() if k not in ["status", "pod_name", "flow_run_id", "depends_on"]}
     job = create_job_object(flow_run_step_id, params)
     batch_v1.create_namespaced_job(body=job, namespace="default")
     pod = await get_pod_for_job(job)
     await update_step(
         flow_run_step_id,
         pod_name=pod.metadata.name,
-        status="started",
+        status="pending",
         started_at=datetime.now(timezone.utc),
     )
 
@@ -174,36 +175,48 @@ def get_flows() -> dict:
     return dict(flows=flows, flow_runs=flow_runs, flow_run_steps=flow_run_steps)
 
 
+async def upstream_steps_succeeded(step):
+    flow_run_id = step["flow_run_id"]
+    depends_on = step.get("depends_on")
+    if not depends_on:
+        return True
+
+    flow_run_steps = graphql.get_flow_run_steps_by_run_id_and_name(flow_run_id, step["depends_on"])
+    if any([s["status"] in ["failed","canceled"] for s in flow_run_steps]):
+        # There was a failure upstream, skip this step
+        await update_step(step["id"], status="skipped")
+        return False
+    
+    if all([s["status"] in ["succeeded"] for s in flow_run_steps]):
+        return True
+
+    # Otherwise, there's still a step we're waiting for
+    return False
+
+
 async def scheduler():
     """
     The scheduler is responsible for polling the database for run steps that
     should be sent to the kubernetes cluster.
     """
+
+    # First pick up anything we've dropped
+    unscheduled_flow_run_steps = graphql.get_flow_run_steps_by_nin_status(
+        ["queued", "succeeded", "failed", "running"]
+    )
+    for step in unscheduled_flow_run_steps:
+        await reattach_to_step(step)
+
     while True:
         # Check if any run steps are eligible to be sent to kubernetes
-
-        # TODO eventually there will be some dependency management to do here, but for now
-        # any step that has been put in the database will be run immediately.
         unscheduled_flow_run_steps = graphql.get_flow_run_steps_by_nin_status(
-            ["queued", "succeeded", "failed"]
+            ["queued", "started", "succeeded", "running", "failed"]
         )
 
         # TODO actual logging
-
         for step in unscheduled_flow_run_steps:
-
-            if step["status"] == "created":
+            if await upstream_steps_succeeded(step):
                 asyncio.create_task(run_step(step))
-                flow_run_step = graphql.update_flow_run_step(
-                    step["id"], status="queued"
-                )
-                queue.put_nowait({"type": "event", "flow_run_step": flow_run_step})
-            elif step["status"] == "started":
-                await reattach_to_step(step)
-            else:
-                print("not sure whats up with this step", step)
-
-            # TODO update the flow run itself (if this is the last step of the run)
 
         # TODO Check if any flows should be scheduled by cron
 
