@@ -1,66 +1,93 @@
 import asyncio
 import json
-import uuid
-from concurrent.futures import ThreadPoolExecutor
-
-from aiofile import async_open
+from functools import partial
+import aiofiles
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
-from websockets.exceptions import ConnectionClosed
 
-import service
+from lib import service, pod_log
 
 app = Sanic("bare_flow")
-app.static('/public', './build')
+app.static("/public", "./build")
+
+dumps = partial(json.dumps, default=str)
+
+
+USERS = set()
+
+
+def get_users():
+    return len(USERS)
+
+
+async def eventing(queue):
+    while True:
+        event = await queue.get()
+        if USERS:
+            await asyncio.wait([user.send(dumps(event)) for user in USERS])
+        queue.task_done()
+        await asyncio.sleep(3)
+
+
+async def register(websocket):
+    USERS.add(websocket)
+
+
+async def unregister(websocket):
+    USERS.remove(websocket)
+
 
 @app.route("/")
 async def index(request):
-    return await response.file('build/index.html')
+    return await response.file("build/index.html")
 
 
-@app.route("/dags/<dag>")
-async def index_with_route(request, dag):
-    return await response.file('build/index.html')
+@app.route("/flows/<flow>")
+async def index_with_route(request, flow):
+    return await response.file("build/index.html")
 
 
 @app.route("/api/logs/<pod>")
 async def logs(request, pod):
-    async def main(res):
-    #TODO close request when pod is finished running
-        async with async_open(f"pod-logs/{pod}", 'r') as afp:
-            while True:
-                line = await afp.readline()
-                if line != "":
-                    await res.write(line)
-
-    # obviously this will have to be extended to different task runs
-    return response.stream(main)
+    return await pod_log.tail_log(pod)
 
 
 @app.route("/run/<flow_id>", methods=["POST"])
 async def run(request, flow_id):
     flow = service.flows[flow_id]
-    service.schedule_flow(flow_id, flow)
+    flow_run_steps = await service.schedule_flow(flow_id, flow)
     # This will run the flow in the background. The status
     # will be updated in the `flow_runs` table in the database.
-    
-    return response.empty()
+    return response.json(flow_run_steps, dumps=dumps)
 
 
 clients = {}
 
+
+async def msg(ws, type, **body):
+    await ws.send(dumps(dict(type=type, **body)))
+
+
 @app.websocket("/ws")
 async def feed(request, ws):
-    _id = uuid.uuid4().hex
-    clients[_id] = ws
+    await register(ws)
+    try:
+        # Send initial flow details
+        await msg(ws, "initialize", **service.get_flows())
+        async for message in ws:
+            # We don't expect to receive any messages but this keeps the connection alive
+            json.loads(message)
+    finally:
+        await unregister(ws)
 
-    # Send the client its socket ID
-    data = dict(type="sid", sid=_id)
-    await ws.send(json.dumps(data))
 
-    # Send initial dag details
-    await ws.send(json.dumps(dict(type="dags", dags=service.flows)))
+@app.listener("after_server_start")
+def start_scheduler(app, loop):
+    app.add_task(service.scheduler())
+    app.queue = asyncio.Queue(loop=loop)
+    service.queue = app.queue
+    app.add_task(eventing(app.queue))
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=8000, protocol=WebSocketProtocol)
+    app.run(host="0.0.0.0", port=8000, protocol=WebSocketProtocol)

@@ -1,6 +1,6 @@
 <script>
-  import Dag from "./ListItemDag.svelte"
-  import { dags } from "./stores.js"
+  import FlowStub from "./stub.svelte"
+  import { flows } from "../stores.js"
 
   export let router
 </script>
@@ -13,7 +13,7 @@
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Dag
+                Flow
               </th>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Schedule
@@ -30,9 +30,9 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            {#each Object.values($dags) || [] as dag}
+            {#each (Object.entries($flows) || []) as flow}
               <!-- TODO: incorporate steps into UI -->
-              <Dag dag={dag[0]} {router}/>
+              <FlowStub {flow} {router}/>
             {/each}
           </tbody>
         </table>

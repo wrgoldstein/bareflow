@@ -1,4 +1,4 @@
-from flow import step
+from lib.flow import step
 
 step(
     flow_id="whalesay",

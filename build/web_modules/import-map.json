@@ -1,9 +1,0 @@
-{
-  "imports": {
-    "navaid": "./navaid.js",
-    "svelte": "./svelte.js",
-    "svelte/internal": "./svelte/internal.js",
-    "svelte/store": "./svelte/store.js",
-    "tailwindcss/dist/tailwind.css": "./tailwindcss/dist/tailwind.css"
-  }
-}

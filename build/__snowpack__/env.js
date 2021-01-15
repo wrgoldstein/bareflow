@@ -1,1 +1,0 @@
-export default {"SNOWPACK_PUBLIC_SOCKET_URL":"ws://0.0.0.0:8000","MODE":"production","NODE_ENV":"production","SSR":false};
