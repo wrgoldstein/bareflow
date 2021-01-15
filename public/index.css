@@ -26,6 +26,19 @@
   animation: barberpole 1s linear infinite;
 }
 
+.animated-stripe-blue {
+  background-image: 
+    repeating-linear-gradient(
+      -45deg, 
+      transparent, 
+      transparent .2rem,
+      #4f46e588 .2rem,
+      #4f46e588 .4rem
+    );
+  background-size: 200% 200%;
+  animation: barberpole 1s linear infinite;
+}
+
 @keyframes barberpole {
   100% {
     background-position: 100% 100%;

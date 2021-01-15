@@ -7,10 +7,20 @@
     copied = true
     setTimeout(() => {
       copied = false
-    }, 500)
+    }, 200)
   }
 </script>
-<div class="h-8 items-center flex bg-grey-500 border rounded p-1">
+<style>
+  .transition {
+    transition: background-color 150ms linear;
+  }
+  .copied {
+    transition-timing-function: ease;
+    background-color:#10b98188;
+  }
+
+</style>
+<div class:copied class="transition h-8 items-center flex bg-grey-500 border rounded p-1">
   <svg width=24 color="grey" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <title>Docker icon</title>
       <path style="fill: grey;"
@@ -20,8 +30,8 @@
     {pod_name}
   </div>
   <div class="flex-auto">
-    <button class="{copied ? 'bg-green-200 rounded-full' : '' } pl-1 pr-1 focus:outline-none float-right" on:click={copy}>
-      { copied ? 'copied' : 'copy' }
+    <button class="pl-1 pr-1 focus:outline-none float-right" on:click={copy}>
+      copy
     </button>
   </div>
 </div>

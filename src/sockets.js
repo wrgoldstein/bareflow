@@ -1,6 +1,5 @@
 import {
   update_flows,
-  update_flow_runs,
   update_flow_run_steps,
 } from "./stores.js";
 
@@ -18,7 +17,6 @@ socket.addEventListener("message", (event) => {
   switch (message.type) {
     case "initialize":
       update_flows(message.flows);
-      update_flow_runs(message.flow_runs);
       update_flow_run_steps(message.flow_run_steps);
       break;
 

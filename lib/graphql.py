@@ -161,6 +161,33 @@ def get_flow_run_steps_by_nin_status(status: list) -> dict:
     """
     return requests.post(url, json=dict(query=q)).json()["data"]["flow_run_steps"]
 
+
+def get_unfinished_flow_runs() -> dict:
+    q = """
+query MyQuery {
+        flow_runs(
+            where: {outcome: {_is_null: true}}
+        ) {
+            id
+            flow_id
+            outcome
+            flow_run_steps {
+                id
+                flow_run_id
+                started_at
+                ended_at
+                name
+                image
+                status
+                pod_name
+                depends_on
+                command
+            }
+        }
+    }
+    """
+    return requests.post(url, json=dict(query=q)).json()["data"]["flow_runs"]
+
 def get_flow_run_steps_by_run_id_and_name(flow_run_id: int, flow_run_step_names: str):
     q = f"""
     query MyQuery {{

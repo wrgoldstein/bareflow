@@ -13,6 +13,7 @@
     "d3-axis": "^2.0.0",
     "d3-scale": "^3.2.3",
     "env-cmd": "^10.1.0",
+    "lodash": "^4.17.20",
     "navaid": "^1.2.0",
     "svelte": "^3.31.2",
     "svelte-charts": "github:wrgoldstein/svelte-charts",

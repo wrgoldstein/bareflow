@@ -1,6 +1,6 @@
 import asyncio
 import json
-
+from functools import partial
 import aiofiles
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
@@ -9,6 +9,8 @@ from lib import service, pod_log
 
 app = Sanic("bare_flow")
 app.static("/public", "./build")
+
+dumps = partial(json.dumps, default=str)
 
 
 USERS = set()
@@ -22,7 +24,7 @@ async def eventing(queue):
     while True:
         event = await queue.get()
         if USERS:
-            await asyncio.wait([user.send(json.dumps(event)) for user in USERS])
+            await asyncio.wait([user.send(dumps(event)) for user in USERS])
         queue.task_done()
         await asyncio.sleep(3)
 
@@ -53,17 +55,17 @@ async def logs(request, pod):
 @app.route("/run/<flow_id>", methods=["POST"])
 async def run(request, flow_id):
     flow = service.flows[flow_id]
-    flow_run = await service.schedule_flow(flow_id, flow)
+    flow_run_steps = await service.schedule_flow(flow_id, flow)
     # This will run the flow in the background. The status
     # will be updated in the `flow_runs` table in the database.
-    return response.json(flow_run)
+    return response.json(flow_run_steps, dumps=dumps)
 
 
 clients = {}
 
 
 async def msg(ws, type, **body):
-    await ws.send(json.dumps(dict(type=type, **body)))
+    await ws.send(dumps(dict(type=type, **body)))
 
 
 @app.websocket("/ws")
@@ -88,4 +90,4 @@ def start_scheduler(app, loop):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True, port=8000, protocol=WebSocketProtocol)
+    app.run(host="0.0.0.0", port=8000, protocol=WebSocketProtocol)

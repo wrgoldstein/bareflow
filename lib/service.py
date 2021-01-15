@@ -13,11 +13,14 @@ from pathlib import Path
 
 from kubernetes import client, config, watch
 
-from . import graphql
+from .database import query
 from . import utils
 from .flow import flows
 
+
+
 queue = None  # set by app.py to be on the same loop as the web server
+scheduled_steps = set()
 
 # Load all dags.. this should be more dynamical
 paths = Path("flows").glob("*.py")  # TODO nested
@@ -28,9 +31,9 @@ for path in paths:
 
 
 async def schedule_flow(flow_id: str, flow: dict):
-    flow_run = graphql.create_flow_run_and_steps(flow_id, flow["steps"])
-    queue.put_nowait({"source": "scheduler_flow", "type": "event", "flow_run": flow_run})
-    return flow_run
+    flow_run_steps = query.create_flow_run_and_steps(flow_id, flow["steps"])
+    queue.put_nowait({"queued_at": datetime.today().isoformat(), "type": "event", "flow_run_steps": flow_run_steps})
+    return flow_run_steps
 
 
 config.load_kube_config()
@@ -101,14 +104,15 @@ async def wait_for_pod_status(pod_name: str, statuses: List[str]) -> str:
 
 
 async def update_step(flow_run_step_id: int, **kwargs):
-    flow_run_step = graphql.update_flow_run_step(flow_run_step_id, **kwargs)
-    queue.put_nowait({"source": "update_step", "type": "event", "flow_run_step": flow_run_step})
+    flow_run_step = query.update_flow_run_step(flow_run_step_id, **kwargs)
+    queue.put_nowait({"queued_at": datetime.today().isoformat(), "type": "event", "flow_run_step": flow_run_step})
 
 
 async def run_step(step: dict):
     flow_run_step_id = step.pop("id")
     await update_step(flow_run_step_id, status="starting")
-    params = {k: v for k, v in step.items() if k not in ["status", "pod_name", "flow_run_id", "depends_on"]}
+    # TODO jesus.
+    params = {k: v for k, v in step.items() if k not in ["flow_id", "outcome", "log_status", "stats", "status", "pod_name", "flow_run_id", "depends_on", "created_at", "started_at", "ended_at", "updated_at"]}
     job = create_job_object(flow_run_step_id, params)
     batch_v1.create_namespaced_job(body=job, namespace="default")
     pod = await get_pod_for_job(job)
@@ -138,7 +142,7 @@ async def run_step(step: dict):
     await update_step(
         flow_run_step_id, status=status.lower(), ended_at=datetime.now(timezone.utc)
     )
-
+    scheduled_steps.remove(flow_run_step_id)
     log.terminate()
 
 
@@ -167,12 +171,10 @@ def get_flows() -> dict:
     Rolls up individual steps to get a total duration and status for the run,
     which is shown in the index view.
     """
-    flow_runs = graphql.get_flow_runs(25)
-
     # To make state management easier on the client, we do not nest
     # run steps inside their runs.
-    flow_run_steps = [flat for arr in [flow_run.pop("flow_run_steps") for flow_run in flow_runs] for flat in arr]
-    return dict(flows=flows, flow_runs=flow_runs, flow_run_steps=flow_run_steps)
+    flow_run_steps = query.get_flow_runs(25)
+    return dict(flows=flows, flow_run_steps=flow_run_steps)
 
 
 async def upstream_steps_succeeded(step):
@@ -181,7 +183,7 @@ async def upstream_steps_succeeded(step):
     if not depends_on:
         return True
 
-    flow_run_steps = graphql.get_flow_run_steps_by_run_id_and_name(flow_run_id, step["depends_on"])
+    flow_run_steps = query.get_flow_run_steps_by_run_id_and_name(flow_run_id, tuple(step["depends_on"]))
     if any([s["status"] in ["failed","canceled"] for s in flow_run_steps]):
         # There was a failure upstream, skip this step
         await update_step(step["id"], status="skipped")
@@ -199,28 +201,58 @@ async def scheduler():
     The scheduler is responsible for polling the database for run steps that
     should be sent to the kubernetes cluster.
     """
+    closed_statuses = ["queued", "succeeded", "failed", "running", "skipped"]
 
     # First pick up anything we've dropped
-    unscheduled_flow_run_steps = graphql.get_flow_run_steps_by_nin_status(
-        ["queued", "succeeded", "failed", "running"]
+    unscheduled_flow_run_steps = query.get_flow_run_steps_by_nin_status(
+        closed_statuses
     )
     for step in unscheduled_flow_run_steps:
         await reattach_to_step(step)
 
     while True:
         # Check if any run steps are eligible to be sent to kubernetes
-        unscheduled_flow_run_steps = graphql.get_flow_run_steps_by_nin_status(
-            ["queued", "started", "succeeded", "running", "failed"]
+        unscheduled_flow_run_steps = query.get_flow_run_steps_by_nin_status(
+            closed_statuses
         )
 
         # TODO actual logging
         for step in unscheduled_flow_run_steps:
-            if await upstream_steps_succeeded(step):
-                asyncio.create_task(run_step(step))
+            if step["id"] not in scheduled_steps:
+                if await upstream_steps_succeeded(step):
+                    scheduled_steps.add(step["id"])
+                    asyncio.create_task(run_step(step))
 
         # TODO Check if any flows should be scheduled by cron
+        # # mega mega hack bad bad bad change this
+        # flow_run_steps = query.get_flow_run_steps_by_nin_status([])
+        # max_times = {}
+        # ongoing = set()
+        # for step in flow_run_steps:
+        #     flow_id = step["flow_id"]
+        #     if flow_id in ongoing:
+        #         continue
 
-        await asyncio.sleep(5)
+        #     if step["status"] in ["failed", "succeeded"]:
+        #         if flow_id not in max_times:
+        #             max_times[flow_id] = step["ended_at"]
+        #         else:
+        #             max_times[flow_id] = max(max_times["flow_id"], step["ended_at"])
+        #     else:
+        #         ongoing.add(flow_id)
+
+        # for flow in flows:
+        #     if flow["croniter"] is not None:
+        #         cr = flow["croniter"]
+        #         breakpoint()
+        #         flow_runs
+                # cr.
+                # NEED TO MAKE the db just SQL no hasura
+                # megahack time
+                
+
+
+        await asyncio.sleep(1)
 
 
 if __name__ == "__main__":
