@@ -10,7 +10,7 @@ base = datetime(2010, 1, 25, 4, 46)
 flows = defaultdict(lambda: defaultdict(list))
 
 # a simple way to register a job
-def step(*, flow_id, name, image, command, schedule=None, depends_on=[]):
+def step(*, flow_id, name, image, command=None, schedule=None, depends_on=[]):
     # TODO topological sort
     flows[flow_id]["steps"].append(
         dict(

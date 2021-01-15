@@ -22,6 +22,13 @@ from .flow import flows
 queue = None  # set by app.py to be on the same loop as the web server
 scheduled_steps = set()
 
+config.load_kube_config()
+watcher = watch.Watch()
+batch_v1 = client.BatchV1Api()
+v1 = client.CoreV1Api()
+
+websockets = {}
+
 # Load all dags.. this should be more dynamical
 paths = Path("flows").glob("*.py")  # TODO nested
 for path in paths:
@@ -36,20 +43,12 @@ async def schedule_flow(flow_id: str, flow: dict):
     return flow_run_steps
 
 
-config.load_kube_config()
-watcher = watch.Watch()
-batch_v1 = client.BatchV1Api()
-v1 = client.CoreV1Api()
-
-websockets = {}
-
-
 def create_job_object(
     flow_run_step_id: int, params: dict
 ) -> client.models.v1_job.V1Job:
     # Configureate Pod template container
     unique_name = f"{params['name']}-{uuid.uuid4().hex[:6]}"
-    container = client.V1Container(**params)
+    container = client.V1Container(image_pull_policy="Never", **params)
 
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
@@ -60,7 +59,7 @@ def create_job_object(
     )
 
     # Create the specification of deployment
-    spec = client.V1JobSpec(template=template, backoff_limit=4)  # TODO RETRIES????
+    spec = client.V1JobSpec(template=template, backoff_limit=1)
 
     # Instantiate the job object
     job = client.V1Job(

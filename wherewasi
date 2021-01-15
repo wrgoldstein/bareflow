@@ -1,5 +1,24 @@
+1/14/2021
+big day
+* rewrote all the queries and done with hasura
+* rewrote the frontend to take the new format of data (no more *runs* just steps, and we calculate runs from steps on the client)
+* wrote and removed dependency management
 
-1/13/2010:
+TODO:
+* add back in simple dependencies
+* handle syncin kubernetes state better
+  => when we work on a pod, add it to an in memory set and when we're done remove it
+    if the server starts and theres a step in the db but nothing in the set, we know to pick it back up
+  => get container statuses ( e.g. err image pull backoff )
+  => handle the case where the pod isn't available (right now it messes up logs)
+
+* i dont feel that good about the scheduling process in terms of consistency, idempotency, etc. it can be improved
+* it would be nice to visualize:
+  - inter step dependencies
+  - run/step durations
+  - 
+
+1/13/2021:
 the ui is getting there
 
 * need to implement choosing a run to look at (see diagram below)
