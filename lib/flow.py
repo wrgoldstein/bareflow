@@ -21,6 +21,6 @@ def step(*, flow_id, name, image, command=None, schedule=None, depends_on=[]):
             depends_on=depends_on,
             schedule=schedule,
             schedule_words=get_description(schedule) if schedule else None,
-            cronitor=croniter(schedule, base) if schedule else None
+            cronitor=croniter(schedule, base) if schedule else None,
         )
     )

@@ -1,4 +1,3 @@
-
 import psycopg2
 
 # TODO actual configuration
@@ -8,7 +7,7 @@ config = {
     "database.bareflow.username": "postgres",
     "database.bareflow.password": "postgres",
     "database.bareflow.database": "postgres",
-    "database.bareflow.ssl_mode": "disable"
+    "database.bareflow.ssl_mode": "disable",
 }
 
 
@@ -22,6 +21,13 @@ def get_connection_for(db_name: str) -> psycopg2.extensions.connection:
     return psycopg2.connect(
         f"postgresql://{user}:{password}@{host}:{port}/{database}", sslmode=ssl_mode
     )
+
+
+def get_autocommit_conn_for(db_name):
+    conn = get_connection_for(db_name)
+    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+    return conn
+
 
 tables = [
     """
@@ -47,7 +53,7 @@ tables = [
         pod_name text,
         log_status text,
         command text[],
-        depends_on jsonb,
+        depends_on text[],
         status text,
         created_at timestamp not null default now(),
         updated_at timestamp not null default now(),
@@ -58,8 +64,9 @@ tables = [
             foreign key(flow_run_id)
                 references  flow_runs(id)
     )
-    """
+    """,
 ]
+
 
 def setup_tables() -> None:
     with get_connection_for("bareflow") as conn:
