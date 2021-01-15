@@ -25,10 +25,7 @@ def create_job_object(step: dict) -> client.models.v1_job.V1Job:
     labels = dict(step_id=f"step-{step['id']}")
     # Instantiate the job object
     job = client.V1Job(
-        api_version="batch/v1",
-        kind="Job",
-        metadata=client.V1ObjectMeta(name=unique_name, labels=labels),
-        spec=spec,
+        api_version="batch/v1", kind="Job", metadata=client.V1ObjectMeta(name=unique_name, labels=labels), spec=spec,
     )
 
     return job

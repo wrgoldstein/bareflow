@@ -13,9 +13,7 @@ logs = [x.stem for x in Path(log_dir).glob("*") if not x.stem.startswith(".")]
 
 async def in_use(file_path):
     proc = await asyncio.create_subprocess_shell(
-        f"fuser -- {file_path}",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+        f"fuser -- {file_path}", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
     )
     output = await proc.communicate()
     own_pid = os.getpid()

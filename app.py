@@ -53,12 +53,8 @@ async def feed(request, ws):
     await notifier.register(ws)
     try:
         # Send initial flow details
-        data = dict(
-            flows=flow_finder.flows, flow_run_steps=query.get_steps_for_n_flow_runs(25)
-        )
-        await msg(
-            ws, "initialize",
-        )
+        data = dict(flows=flow_finder.flows, flow_run_steps=query.get_steps_for_n_flow_runs(25))
+        await msg(ws, "initialize", **data)
         async for message in ws:
             # We don't expect to receive any messages but this keeps the connection alive
             json.loads(message)

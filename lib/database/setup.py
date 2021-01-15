@@ -18,9 +18,7 @@ def get_connection_for(db_name: str) -> psycopg2.extensions.connection:
     password = config.get(f"database.{db_name}.password", "")
     database = config.get(f"database.{db_name}.database", None)
     ssl_mode = config.get(f"database.{db_name}.ssl_mode", None)
-    return psycopg2.connect(
-        f"postgresql://{user}:{password}@{host}:{port}/{database}", sslmode=ssl_mode
-    )
+    return psycopg2.connect(f"postgresql://{user}:{password}@{host}:{port}/{database}", sslmode=ssl_mode)
 
 
 def get_autocommit_conn_for(db_name):

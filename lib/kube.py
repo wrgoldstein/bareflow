@@ -30,22 +30,14 @@ def wrapper(f, **kwargs):
     return inner
 
 
-v1_get_job_status = wrapper(
-    batch_v1.read_namespaced_job_status, namespace="default", async_req=True
-)
+v1_get_job_status = wrapper(batch_v1.read_namespaced_job_status, namespace="default", async_req=True)
 v1_get_pods = wrapper(v1.list_namespaced_pod, namespace="default", async_req=True)
-v1_get_pod_status = wrapper(
-    v1.read_namespaced_pod_status, namespace="default", async_req=True
-)
-v1_create_job = wrapper(
-    batch_v1.create_namespaced_job, namespace="default", async_req=True
-)
+v1_get_pod_status = wrapper(v1.read_namespaced_pod_status, namespace="default", async_req=True)
+v1_create_job = wrapper(batch_v1.create_namespaced_job, namespace="default", async_req=True)
 
 
 @tenacity.retry(wait=tenacity.wait_fixed(3), stop=tenacity.stop_after_attempt(10))
-async def get_pod_for_job(
-    job: client.models.v1_job.V1Job,
-) -> client.models.v1_pod.V1Pod:
+async def get_pod_for_job(job: client.models.v1_job.V1Job,) -> client.models.v1_pod.V1Pod:
     "Waits 30 seconds for a pod to be available. Assumes one pod per job."
     pods = await v1_get_pods(label_selector=f"job-name={job.metadata.name}")
     return pods.items[0]
@@ -57,9 +49,7 @@ async def create_job(job: client.models.v1_job.V1Job):
 
 async def create_log_tailer(pod_name: str):
     cmd = f"kubectl logs -n default {pod_name} --follow"
-    proc = await asyncio.create_subprocess_shell(
-        cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
+    proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     return proc
 
 

@@ -8,30 +8,16 @@ def create_flow_run_and_steps(flow_id: str, steps: List[dict]) -> dict:
     with get_connection_for("bareflow") as conn:
         with conn.cursor() as cur:
             # Can't use realdictcursor with execute_values :(
-            cur.execute(
-                "insert into flow_runs (flow_id) values (%s) returning id", [flow_id]
-            )
+            cur.execute("insert into flow_runs (flow_id) values (%s) returning id", [flow_id])
             flow_run_id = cur.fetchone()
 
-            values = list(
-                map(
-                    lambda step: (
-                        flow_run_id,
-                        step["name"],
-                        step["image"],
-                        step["command"],
-                    ),
-                    steps,
-                )
-            )
+            values = list(map(lambda step: (flow_run_id, step["name"], step["image"], step["command"],), steps,))
             insert_query = """
                 insert into flow_run_steps (flow_run_id, name, image, command)
                 values %s
                 """
 
-            psycopg2.extras.execute_values(
-                cur, insert_query, values, template=None, page_size=100
-            )
+            psycopg2.extras.execute_values(cur, insert_query, values, template=None, page_size=100)
 
     return get_flow_run(flow_run_id)
 
