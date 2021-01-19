@@ -1,3 +1,17 @@
+1/15/2021
+
+final day.. doing a python side cleanup (again)
+using postgres notifications for my queue
+
+[web] -- respond to clients, trigger on demand runs, stream logs
+[scheduler] -- poll database and send runs to runner
+[runner] -- receive events from scheduler, trigger k8s jobs; follow and propagate updates
+
+
+
+
+
+
 1/14/2021
 big day
 * rewrote all the queries and done with hasura

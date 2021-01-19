@@ -1,0 +1,51 @@
+
+
+* will it work with 300 dags?
+  => UI things, like search
+  => Scalability for the scheduler
+  => 
+* will it handle scheduler downtime, restarts, deleted pods, etc
+* how should it handle dag updates
+* implement alerts
+* reliably archive log output
+* needs to be a *high reliability system*
+
+* what nick is looking for (in the UI):
+  - pattern of failures, diagnosis
+  - ability to group jobs besides making dags (tags?)
+  - dashboard that shows health by family
+
+  - tie the scheduler to the health of the data
+    => tie health checks for the output of the job to the job itself
+
+  - soft dag inter-dependence (have to think about it)
+  - scaling to many jobs/dags is terrible in airflow
+
+airflow failings
+
+_____________________________________________________________________________
+| k8s centric scheduler is good because it doesnt have to dupicate k8s state |
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+why not just run jobs on k8s directly?
+- alerting, logging, run history, monitoring, dags, oddball schedules, triggers, logically grouping Jobs
+
+airflow likings
+- dags logs n monitoring
+
+things people dont use in airflow but should use
+- inter dag dep, triggers
+
+
+cons:
+- airflow pretty much works
+- people are used to airflow
+- opportunity cost
+- 
+
+pros:
+- solve some of the reliability issues with airflow
+- address some of the interface things terms of debugging
+- open source cred maybe? a lot of companies don't want to 'set up' airflow but have kubernetes
+- learn a lot
+

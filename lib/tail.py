@@ -1,17 +1,19 @@
-
 import asyncio
 import aiofiles
 import os
 from sanic import response
+from pathlib import Path
 
-#TODO configure pod log directory
+from . import kube
+
+log_dir = "pod-logs"
+
+logs = [x.stem for x in Path(log_dir).glob("*") if not x.stem.startswith(".")]
 
 
 async def in_use(file_path):
     proc = await asyncio.create_subprocess_shell(
-        f"fuser -- {file_path}",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        f"fuser -- {file_path}", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
     )
     output = await proc.communicate()
     own_pid = os.getpid()
@@ -20,29 +22,18 @@ async def in_use(file_path):
     return True if other_pids else False
 
 
-async def tail(file_path, tell=None):
-    # read the file
+async def tail(pod_name: str, tell=None):
+    file_path = f"{log_dir}/{pod_name}"
     async with aiofiles.open(file_path, "r") as f:
         if tell is not None:
             await f.seek(tell)
-        
+
         async for line in f:
             yield line
-        
+
         if await in_use(file_path):
             await asyncio.sleep(1)
             count = 0
             async for line in tail(file_path, await f.tell()):
                 count += 1
-                yield  line
-
-
-
-async def tail_log(pod):
-    file_path = f"pod-logs/{pod}"
-
-    async def main(res):
-        async for line in tail(file_path):
-            await res.write(line)
-        
-    return response.stream(main)
+                yield line
