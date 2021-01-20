@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "snowpack dev",
-    "build": "snowpack build",
+    "build": "env-cmd -f .env snowpack build",
     "build:local:watch": "env-cmd -f .env snowpack build --watch"
   },
   "devDependencies": {
@@ -16,7 +16,6 @@
     "lodash": "^4.17.20",
     "navaid": "^1.2.0",
     "svelte": "^3.31.2",
-    "svelte-charts": "github:wrgoldstein/svelte-charts",
     "tailwindcss": "^2.0.2"
   }
 }

@@ -1,17 +1,25 @@
 # Kubernetes centric workflow scheduler
 
-Orchestrate running tasks on k8s on a schedule, with dependencies.
+Orchestrate running tasks on k8s on a schedule, the easy way.
 
 **Status**: under construction
 
+
 ## Development
 
-At separate terminal prompts:
+```
+# build assets
+npm run build
 
-```
-npm run build:local:watch
-```
+# run the scheduler
+python -m lib.scheduler
 
-```
+# run the webserver
 python -m app
+```
+
+or just
+
+```
+docker-compose up
 ```

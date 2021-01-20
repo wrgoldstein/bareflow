@@ -24,8 +24,7 @@ async def notify():
         conn.poll()
         while conn.notifies:
             notify = conn.notifies.pop(0)
-            event = dict(event=loads(notify.payload))
-            print("Sending update", event)
+            event = dict(type="event", event=loads(notify.payload))
             if USERS:
                 await asyncio.wait([user.send(dumps(event)) for user in USERS])
 

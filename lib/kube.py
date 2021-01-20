@@ -48,7 +48,7 @@ async def create_job(job: client.models.v1_job.V1Job):
 
 
 async def create_log_tailer(pod_name: str):
-    cmd = f"kubectl logs -n default {pod_name} --follow"
+    cmd = f"kubectl logs -n default {pod_name} --follow > pod-logs/{pod_name}" # major hack
     proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     return proc
 
@@ -56,6 +56,7 @@ async def create_log_tailer(pod_name: str):
 async def create_and_follow_job(job: client.models.v1_job.V1Job):
     await create_job(job)
     yield dict(status="created")
+    logger = None
     succeed_pods = set()
     while True:
         res = await v1_get_job_status(name=job.metadata.name)
@@ -65,6 +66,8 @@ async def create_and_follow_job(job: client.models.v1_job.V1Job):
             failed = res.status.failed or 0
 
             pod = await get_pod_for_job(job)
+            if logger is None:
+                logger = asyncio.create_task(create_log_tailer(pod.metadata.name))
 
             yield dict(pod_name=pod.metadata.name, status=pod.status.phase.lower())
 

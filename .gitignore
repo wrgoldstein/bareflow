@@ -4,3 +4,4 @@ logs
 pod-logs/*
 build
 postgres*
+.env

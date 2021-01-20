@@ -31,7 +31,7 @@ async def schedule_flow(flow_id: str, flow: dict) -> List[dict]:
 async def update_step_with_latest(job):
     pod = await kube.get_pod_for_job(job)
     # TODO what if the pod has been deleted?
-    step_id = job.metadata.labels.step_id
+    step_id = job.metadata.labels["step_id"].split("-")[1]
     query.update_flow_run_step(int(step_id), status=pod.status.phase.lower())
 
 

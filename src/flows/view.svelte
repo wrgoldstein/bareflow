@@ -97,9 +97,11 @@
       }
     };
   };
-
+  const showState = () => {
+    console.log($derived_state)
+  }
 </script>
-
+<!-- <button on:click={showState}>show state</button> -->
 {#if $derived_state.flow}
   <!-- header -->
   <div class="lg:flex lg:items-center lg:justify-between pb-4">
