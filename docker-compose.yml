@@ -4,12 +4,34 @@ services:
     image: postgres:12
     restart: always
     volumes:
-    - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: postgrespassword
     ports:
       - "5432:5432"
+  scheduler:
+    build:
+      context: .
+      args:
+        - PIP_INDEX_URL=$PIP_INDEX_URL
+    command: python3 -m lib.scheduler
+    environment:
+      - POSTGRES_HOST=postgres
+
+  web:
+    build:
+      context: .
+      args:
+        - PIP_INDEX_URL=$PIP_INDEX_URL
+    command: python3 -m lib.app
+    ports:
+      - "8000:8000"
+    environment:
+      - SNOWPACK_PUBLIC_SOCKET_URL=ws://0.0.0.0:8000
+      - POSTGRES_HOST=postgres
+    volumes:
+      - .:.
 volumes:
   db_data:
-    - ./:/app
+
 

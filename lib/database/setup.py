@@ -1,8 +1,10 @@
+import os
+
 import psycopg2
 
 # TODO actual configuration
 config = {
-    "database.bareflow.host": "localhost",
+    "database.bareflow.host": os.getenv("POSTGRES_HOST", "localhost"),
     "database.bareflow.port": 5432,
     "database.bareflow.username": "postgres",
     "database.bareflow.password": "postgres",

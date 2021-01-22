@@ -4,8 +4,7 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN apt install -y nodejs
 COPY requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
-
-COPY lib src public flows pod-logs package.json ./
+COPY lib src public flows pod-logs package.json snowpack.config.js ./
 RUN npm install
 RUN npm run build
 

@@ -1,12 +1,12 @@
 {
   "scripts": {
-    "start": "snowpack dev",
-    "build": "env-cmd -f .env snowpack build",
-    "build:local:watch": "env-cmd -f .env snowpack build --watch"
+    "start": "env-cmd -f .env snowpack dev",
+    "build": "snowpack build",
+    "build:local:watch": "snowpack build --watch"
   },
   "devDependencies": {
-    "@snowpack/plugin-svelte": "^3.4.1",
-    "snowpack": "^2.18.4"
+    "@snowpack/plugin-svelte": "^3.5.2",
+    "snowpack": "^3.0.11"
   },
   "dependencies": {
     "d3-array": "^2.9.1",

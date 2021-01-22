@@ -8,19 +8,10 @@ module.exports = {
     /* ... */
     '@snowpack/plugin-svelte',
   ],
-  install: [
-    /* ... */
-  ],
-  installOptions: {
-    /* ... */
-  },
   devOptions: {
     /* ... */
   },
   buildOptions: {
-    /* ... */
-  },
-  proxy: {
     /* ... */
   },
   alias: {
