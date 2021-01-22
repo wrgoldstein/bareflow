@@ -21,10 +21,7 @@ socket.addEventListener("message", (event) => {
       break;
 
     case "event":
-      if ("flow_run" in message) {
-        update_flow_runs([message.flow_run]);
-      } else if ("flow_run_step" in message) {
-        update_flow_run_steps([message.flow_run_step]);
-      }
+      console.log("yes")
+      update_flow_run_steps([message.event])
   }
 });

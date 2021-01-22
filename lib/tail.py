@@ -24,6 +24,9 @@ async def in_use(file_path):
 
 async def tail(pod_name: str, tell=None):
     file_path = f"{log_dir}/{pod_name}"
+    if not Path(file_path).exists():
+        yield 'NOT FOUND'
+
     async with aiofiles.open(file_path, "r") as f:
         if tell is not None:
             await f.seek(tell)

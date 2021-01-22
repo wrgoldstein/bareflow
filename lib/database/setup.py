@@ -1,8 +1,10 @@
+import os
+
 import psycopg2
 
 # TODO actual configuration
 config = {
-    "database.bareflow.host": "localhost",
+    "database.bareflow.host": os.getenv("POSTGRES_HOST", "localhost"),
     "database.bareflow.port": 5432,
     "database.bareflow.username": "postgres",
     "database.bareflow.password": "postgres",
@@ -27,9 +29,13 @@ def get_autocommit_conn_for(db_name):
     return conn
 
 
+drop_tables = [
+    "drop table if exists flow_runs cascade;",
+    "drop table if exists flow_run_steps;"
+]
+
 tables = [
     """
-    drop table if exists flow_runs cascade;
     create table if not exists flow_runs (
         id int generated always as identity,
         flow_id text not null,
@@ -42,7 +48,6 @@ tables = [
     )
     """,
     """
-    drop table if exists flow_run_steps;
     create table if not exists flow_run_steps (
         id int generated always as identity,
         flow_run_id int,
@@ -66,9 +71,18 @@ tables = [
 ]
 
 
-def setup_tables() -> None:
+def setup_tables(force:bool=False) -> None:
     with get_connection_for("bareflow") as conn:
         with conn.cursor() as cur:
+            if force:
+                for statement in drop_tables:
+                    cur.execute(statement)
             for create_statement in tables:
                 cur.execute(create_statement)
         conn.commit()
+
+
+if __name__ == "__main__":
+    # As a convenience when this file is run directly
+    # the database is totally reset.
+    setup_tables(True)
