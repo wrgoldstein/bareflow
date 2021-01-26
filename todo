@@ -30,3 +30,5 @@
 - [ ] implement a reaper for pods and old runs (limit runs to ... 10,000?)
 
 - [ ] implement tests
+
+- [ ] far future: alternate executor (Google Cloud Run, Fargate)
