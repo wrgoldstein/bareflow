@@ -1,62 +1,42 @@
-"""
-These functions are responsible for communicating between the API and kubernetes,
-including creating jobs and keeping tabs on pod status and log output.
-"""
-import signal
-import functools
+from croniter import croniter
+from datetime import datetime
 import asyncio
-import importlib.util
-import json
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import List
-
-from kubernetes import client, config, watch
-
-from . import kube
+from . import step
+from .finder import flows
 from .utils import dumps
 from .database import get_autocommit_conn_for, query
-from .job import create_job_object
 
 conn = get_autocommit_conn_for("bareflow")
 curs = conn.cursor()
 
-running = set()
 
+"""
+1. On start up: make sure all state reflects what's in K8S
+2. Load all flows: make sure flow records exist in db for each flow
+3. Start scheduling
+     -> send ready-to-run steps to k8s
+     -> create steps for ready-to-run runs
+"""
+async def sync_k8s_state():
+    """
+    for each pod in each job: 
+        * verify the pod state matches what's in the db.
+        * if the pod is Running, start a log tailer process.
+        * if the pod is Completed, verify its log has been uploaded to S3.
+        
+    """
+    pass
 
-async def schedule_flow(flow_id: str, flow: dict) -> List[dict]:
-    return query.create_flow_run_and_steps(flow_id, flow["steps"])
+async def sync_flows():
+    """
+    for each flow:
+        if the flow ID exists in the flows table, continue
+        create a record in the db 
+    """
+    pass
 
-
-async def update_step_with_latest(job):
-    pod = await kube.get_pod_for_job(job)
-    # TODO what if the pod has been deleted?
-    step_id = job.metadata.labels["step_id"].split("-")[1]
-    query.update_flow_run_step(int(step_id), status=pod.status.phase.lower())
-
-
-async def run_step(step: dict):
-    if step["id"] in running:
-        return
-    running.add(step["id"])
-    job = create_job_object(step)
-    try:
-
-        print("trying to run ", job.metadata.name)
-        async for update in kube.create_and_follow_job(job):
-            step = query.update_flow_run_step(step["id"], **update)
-            print("Notifying update", step)
-            curs.execute("NOTIFY updates, %s", (dumps(step),))
-
-    except kube.client.exceptions.ApiException as e:
-        if e.status == 409:
-            print("Job name conflict, this probably means a step was rescheduled")
-            await update_step_with_latest(job)
-            return
-        raise (e)
-    finally:
-        if step["id"] in running:
-            running.remove(step["id"])
+async def create_steps_for_scheduled_runs():
+    pass
 
 
 async def scheduler():
@@ -65,36 +45,21 @@ async def scheduler():
     should be sent to the kubernetes cluster.
     """
 
-    # TODO: [reliability] sync back up on startup
+    await sync_k8s_state()
+    await sync_flows()
+    
     conn = get_autocommit_conn_for("bareflow")
-    curs = conn.cursor()
+
     print("Scheduling...")
-    try:
-        while True:
-            steps = query.get_unscheduled_flow_run_steps()
+    while True:
+        steps = query.get_unscheduled_flow_run_steps()
 
-            for step in steps:
-                asyncio.create_task(run_step(step))
+        for step in steps:
+            asyncio.create_task(step.run_step(step))
 
-                # curs.execute(f"NOTIFY flow_run_steps, %s", (dumps(step), ))
-                # print(f"scheduled step: {step['id']}")
+        await create_steps_for_scheduled_runs()
+        await asyncio.sleep(1)
 
-            await asyncio.sleep(1)
-    except KeyboardInterrupt:
-        print("shit!")
-
-
-# async def poll_for_notifications():
-#     curs.execute(f"LISTEN flow_run_steps")
-#     print("Listening...")
-#     while True:
-#         conn.poll()
-#         while conn.notifies:
-#             notify = conn.notifies.pop(0)
-#             step = json.loads(notify.payload)
-#             if step["id"] not in running:
-#                 asyncio.create_task(run_step(step))
-#         await asyncio.sleep(1)
 
 if __name__ == "__main__":
     asyncio.run(scheduler())

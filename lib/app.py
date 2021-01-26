@@ -4,7 +4,7 @@ import json
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
 
-from lib import flow_finder, tail, notifier, scheduler
+from lib import finder, tail, notifier, scheduler
 from lib.utils import dumps
 from lib.database import query
 
@@ -34,7 +34,7 @@ async def logs(request, pod):
 
 @app.route("/run/<flow_id>", methods=["POST"])
 async def run(request, flow_id):
-    flow = flow_finder.flows[flow_id]
+    flow = finder.flows[flow_id]
     flow_run_steps = await scheduler.schedule_flow(flow_id, flow)
     # This will run the flow in the background. The status
     # will be updated in the `flow_runs` table in the database.
@@ -53,7 +53,7 @@ async def feed(request, ws):
     await notifier.register(ws)
     try:
         # Send initial flow details
-        data = dict(flows=flow_finder.flows, flow_run_steps=query.get_steps_for_n_flow_runs(25))
+        data = dict(flows=finder.flows, flow_run_steps=query.get_steps_for_n_flow_runs(25))
         await msg(ws, "initialize", **data)
         async for message in ws:
             # We don't expect to receive any messages but this keeps the connection alive

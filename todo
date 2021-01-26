@@ -1,0 +1,32 @@
+- [ ] implement flow active/inactive logic
+  * default to inactive
+  * track when was switched to active
+
+- [ ] implement scheduling logic
+  ```
+  baseline = max(enabled_at, last_start_at)
+  next_run_at = croniter(schedule, enabled_at).get_next()
+  if enabled and not_currently_running and next_run_at < right_now():
+      schedule_next_run()
+  ```
+
+- [ ] implement some way to update flows
+  * e.g. airflow constantly looks for updates
+  => if restarting the scheduler is kosher, we could just do that
+
+- [ ] verify it works with local images, better images, etc.
+
+- [ ] think through graceful shutdown..  when would the worst shutdown be?
+  * in between sending a job to k8s and marking it running
+  * while a job is running.. lose track of it
+  * after a job has finished but before it's marked complete in the UI
+  * how will this affect people on the UI? => maybe trigger a 205 on shutdown
+
+- [ ] implement a way to sync the scheduler on startup so restarts are OK.
+
+- [ ] implement sending logs to S3 when a flow run is finished
+  * And fetching logs from S3 for finished flow runs (instead of from disk)
+
+- [ ] implement a reaper for pods and old runs (limit runs to ... 10,000?)
+
+- [ ] implement tests

@@ -36,6 +36,17 @@ drop_tables = [
 
 tables = [
     """
+    create table if not exists flows (
+        id text not null,
+        enabled bool,
+        enabled_at timestamp,
+        stats jsonb,
+        created_at timestamp not null default now(),
+        updated_at timestamp not null default now(),
+        PRIMARY KEY(id)
+    )
+    """,
+    """
     create table if not exists flow_runs (
         id int generated always as identity,
         flow_id text not null,
