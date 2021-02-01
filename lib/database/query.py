@@ -4,6 +4,39 @@ import psycopg2.extras
 from psycopg2.extras import RealDictCursor as rd
 
 
+def get_flows():
+    with get_connection_for("bareflow") as conn:
+        with conn.cursor(cursor_factory=rd) as cur:
+            cur.execute(
+                """
+            select * from flows
+            """
+            )
+            return cur.fetchall()
+
+
+def insert_flow(flow_id: str):
+    with get_connection_for("bareflow") as conn:
+        with conn.cursor(cursor_factory=rd) as cur:
+            cur.execute(
+                """
+            insert into flows (id, enabled) values (%s, false)
+            """,
+                (flow_id,),
+            )
+
+
+def delete_flow_by_id(flow_id: str):
+    with get_connection_for("bareflow") as conn:
+        with conn.cursor(cursor_factory=rd) as cur:
+            cur.execute(
+                """
+            delete from flows where id = %s
+            """,
+                (flow_id,),
+            )
+
+
 def create_flow_run_and_steps(flow_id: str, steps: List[dict]) -> dict:
     with get_connection_for("bareflow") as conn:
         with conn.cursor() as cur:

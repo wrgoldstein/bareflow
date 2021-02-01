@@ -17,23 +17,32 @@ curs = conn.cursor()
      -> send ready-to-run steps to k8s
      -> create steps for ready-to-run runs
 """
+
+
 async def sync_k8s_state():
     """
-    for each pod in each job: 
+    for each step in each job: 
         * verify the pod state matches what's in the db.
         * if the pod is Running, start a log tailer process.
         * if the pod is Completed, verify its log has been uploaded to S3.
-        
     """
     pass
 
-async def sync_flows():
+
+async def insert_new_flows():
     """
-    for each flow:
-        if the flow ID exists in the flows table, continue
-        create a record in the db 
+    Create a record for each flow if it doesn't exist already
     """
-    pass
+    db_flows = query.get_flows()
+    db_flow_ids = [flow["id"] for flow in db_flows]
+    for flow_id in flows.keys():
+        if flow_id not in db_flow_ids:
+            query.insert_flow(flow_id)
+
+    for flow_id in set(db_flow_ids) - set(flows.keys()):
+        # Remove any flow that no longer exists
+        query.delete_flow_by_id(flow_id)
+
 
 async def create_steps_for_scheduled_runs():
     pass
@@ -47,7 +56,7 @@ async def scheduler():
 
     await sync_k8s_state()
     await sync_flows()
-    
+
     conn = get_autocommit_conn_for("bareflow")
 
     print("Scheduling...")
