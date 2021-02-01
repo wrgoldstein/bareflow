@@ -48,7 +48,7 @@ async def create_job(job: client.models.v1_job.V1Job):
 
 
 async def create_log_tailer(pod_name: str):
-    cmd = f"kubectl logs -n default {pod_name} --follow > pod-logs/{pod_name}" # major hack
+    cmd = f"kubectl logs -n default {pod_name} --follow > pod-logs/{pod_name}"  # major hack
     proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     return proc
 

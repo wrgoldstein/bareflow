@@ -14,6 +14,7 @@ curs = conn.cursor()
 
 running = set()
 
+
 async def schedule_flow(flow_id: str, flow: dict) -> List[dict]:
     return query.create_flow_run_and_steps(flow_id, flow["steps"])
 

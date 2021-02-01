@@ -31,7 +31,7 @@ def get_autocommit_conn_for(db_name):
 
 drop_tables = [
     "drop table if exists flow_runs cascade;",
-    "drop table if exists flow_run_steps;"
+    "drop table if exists flow_run_steps;",
 ]
 
 tables = [
@@ -82,7 +82,7 @@ tables = [
 ]
 
 
-def setup_tables(force:bool=False) -> None:
+def setup_tables(force: bool = False) -> None:
     with get_connection_for("bareflow") as conn:
         with conn.cursor() as cur:
             if force:
