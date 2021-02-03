@@ -36,24 +36,27 @@
     const res = await fetch(`/run/${$state.flow_id}`, {
       method: "POST",
     }).then((r) => r.json());
-    console.log(res)
+
     const flow_run_steps = res;
 
     update_flow_run_steps(flow_run_steps);
 
-    const interval = setInterval(() => {
-      // sometimes the event containing the run can be
-      // beaten by the response, so we make sure to wait
-      // for the run to be in our store before selecting it
-      if ($derived_state.flow_runs.map((r) => r.id).includes(res.id)) {
-        clearInterval(interval);
-        select_run(flow_run.id)();
-      }
-    }, 100);
+    // TODO: auto focus on the first flow run step of the newly
+    // triggered flow
+
+    // const interval = setInterval(() => {
+    //   // sometimes the event containing the run can be
+    //   // beaten by the response, so we make sure to wait
+    //   // for the run to be in our store before selecting it
+    //   if ($derived_state.flow_runs.map((r) => r.id).includes(res.id)) {
+    //     clearInterval(interval);
+    //     select_run(flow_run.id)();
+    //   }
+    // }, 100);
 
     // selected_run.set(runs[runs.length - 1])
     // selected_step_ix.set(0)
-    showLogs();
+    // showLogs();
   };
 
   function select_run(id) {
@@ -67,9 +70,10 @@
     };
   }
 
-  const showLogs = async (pod) => {
+  const showLogs = async (flow_run_step) => {
     // This function streams the pod logs from the disk
     // to a variable here keyed on the pod (todo)
+    let pod = flow_run_step.pod_name
     if (pod == undefined) return;
     if (reading_logs_for.has(pod)) {
       return;
@@ -92,7 +96,7 @@
       flow_run_step = $derived_state.flow_run_steps.find(s => s.id == step_id)
       if (flow_run_step && flow_run_step.pod_name){
         if (logs[flow_run_step.pod_name] == undefined){
-          showLogs(flow_run_step.pod_name)
+          showLogs(flow_run_step)
         }
       }
     };

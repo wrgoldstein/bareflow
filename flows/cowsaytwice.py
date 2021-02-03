@@ -22,5 +22,4 @@ step(
     image="docker/whalesay",
     command=["cowsay", "oh gosh number two"],
     depends_on=["whalesay", "always-fail"]
-    # schedule="0 */2 * * *"
 )

@@ -1,10 +1,25 @@
 
-from lib.flow import step
+# from lib.flow import step
 
-step(
-    flow_id="count-to-30",
-    name="counting",  # no underscores
-    image="counterimage",
-    command=["/app/counter.sh"],
-    schedule="*/3 * * * *"
-)
+# @step
+# def counting():
+#     pass
+
+# with flow('count-to-30'):
+#     schedule('*/3 * * * *')
+
+#     counting = step(
+#         name="counting",
+#         image="counterimage",
+#         command=["/app/counter.sh"],
+#     )
+
+#     say_done = step(
+#         name="say-done",
+#         image="docker/whalesay",
+#         command=["cowsay", "done!"],
+#     )
+
+#     with alpha():
+#         with beta():
+#             gamma()

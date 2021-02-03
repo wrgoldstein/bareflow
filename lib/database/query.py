@@ -1,3 +1,7 @@
+"""
+Handcrafted SQL queries for database interactions.
+"""
+
 from typing import List
 from .setup import get_connection_for
 import psycopg2.extras
@@ -187,3 +191,22 @@ def get_unscheduled_flow_run_steps():
             """
             cur.execute(q)
             return cur.fetchall()
+
+def get_steps_with_pod():
+    with get_connection_for("bareflow") as conn:
+        with conn.cursor(cursor_factory=rd) as cur:
+            cur.execute("""
+            select * from flow_run_steps
+            where pod_name is not null
+            and status not in ('failed', 'succeeded')
+            """)
+            return cur.fetchall()
+
+def get_pod_status(pod_name):
+    with get_connection_for("bareflow") as conn:
+        with conn.cursor(cursor_factory=rd) as cur:
+            cur.execute("""
+            select status from flow_run_steps
+            where pod_name = %s
+            """)
+            return cur.fetchall()[0]

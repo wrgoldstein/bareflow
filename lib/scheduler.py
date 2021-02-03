@@ -1,51 +1,12 @@
 from croniter import croniter
 from datetime import datetime
 import asyncio
-from . import step
-from .finder import flows
-from .utils import dumps
+from . import runner, sync
 from .database import get_autocommit_conn_for, query
+
 
 conn = get_autocommit_conn_for("bareflow")
 curs = conn.cursor()
-
-
-"""
-1. On start up: make sure all state reflects what's in K8S
-2. Load all flows: make sure flow records exist in db for each flow
-3. Start scheduling
-     -> send ready-to-run steps to k8s
-     -> create steps for ready-to-run runs
-"""
-
-
-async def sync_k8s_state():
-    """
-    for each step in each job: 
-        * verify the pod state matches what's in the db.
-        * if the pod is Running, start a log tailer process.
-        * if the pod is Completed, verify its log has been uploaded to S3.
-    """
-    pass
-
-
-async def insert_new_flows():
-    """
-    Create a record for each flow if it doesn't exist already
-    """
-    db_flows = query.get_flows()
-    db_flow_ids = [flow["id"] for flow in db_flows]
-    for flow_id in flows.keys():
-        if flow_id not in db_flow_ids:
-            query.insert_flow(flow_id)
-
-    for flow_id in set(db_flow_ids) - set(flows.keys()):
-        # Remove any flow that no longer exists
-        query.delete_flow_by_id(flow_id)
-
-
-async def create_steps_for_scheduled_runs():
-    pass
 
 
 async def scheduler():
@@ -54,20 +15,31 @@ async def scheduler():
     should be sent to the kubernetes cluster.
     """
 
-    await sync_k8s_state()
-    await sync_flows()
-
-    conn = get_autocommit_conn_for("bareflow")
+    await sync.sync_pods_state()
+    await sync.insert_new_flows()
 
     print("Scheduling...")
     while True:
         steps = query.get_unscheduled_flow_run_steps()
 
         for step in steps:
-            asyncio.create_task(step.run_step(step))
+            asyncio.create_task(runner.run_step(step))
 
         await create_steps_for_scheduled_runs()
         await asyncio.sleep(1)
+
+
+async def create_steps_for_scheduled_runs():
+    """
+    baseline = max(enabled_at, last_start_at)
+    next_run_at = croniter('*/3 * * * *', enabled_at).get_next()
+    if enabled and not_currently_running and next_run_at < right_now():
+        schedule_next_run()
+    """
+
+    #TODO
+
+    pass
 
 
 if __name__ == "__main__":

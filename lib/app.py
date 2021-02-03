@@ -4,7 +4,7 @@ import json
 from sanic import Sanic, response
 from sanic.websocket import WebSocketProtocol
 
-from lib import finder, tail, notifier, scheduler
+from lib import finder, tail, notifier, runner
 from lib.utils import dumps
 from lib.database import query
 
@@ -35,7 +35,7 @@ async def logs(request, pod):
 @app.route("/run/<flow_id>", methods=["POST"])
 async def run(request, flow_id):
     flow = finder.flows[flow_id]
-    flow_run_steps = await scheduler.schedule_flow(flow_id, flow)
+    flow_run_steps = await runner.schedule_flow(flow_id, flow)
     # This will run the flow in the background. The status
     # will be updated in the `flow_runs` table in the database.
     return response.json(flow_run_steps, dumps=dumps)
