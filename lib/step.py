@@ -15,10 +15,6 @@ curs = conn.cursor()
 running = set()
 
 
-async def schedule_flow(flow_id: str, flow: dict) -> List[dict]:
-    return query.create_flow_run_and_steps(flow_id, flow["steps"])
-
-
 async def update_step_with_latest(job):
     pod = await kube.get_pod_for_job(job)
     # TODO what if the pod has been deleted?

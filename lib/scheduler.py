@@ -1,10 +1,13 @@
-from croniter import croniter
-from datetime import datetime
 import asyncio
+from datetime import datetime
+from typing import List
+
+from croniter import croniter
+
 from . import step
+from .database import get_autocommit_conn_for, query
 from .finder import flows
 from .utils import dumps
-from .database import get_autocommit_conn_for, query
 
 conn = get_autocommit_conn_for("bareflow")
 curs = conn.cursor()
@@ -18,6 +21,9 @@ curs = conn.cursor()
      -> create steps for ready-to-run runs
 """
 
+async def schedule_flow(flow_id: str, flow: dict) -> List[dict]:
+    return query.create_flow_run_and_steps(flow_id, flow["steps"])
+
 
 async def sync_k8s_state():
     """
@@ -25,6 +31,13 @@ async def sync_k8s_state():
         * verify the pod state matches what's in the db.
         * if the pod is Running, start a log tailer process.
         * if the pod is Completed, verify its log has been uploaded to S3.
+    """
+    pass
+
+async def sync_flows():
+    """
+    Intention here is to make sure the db has up to date
+    information about flows we want to define.
     """
     pass
 
@@ -63,8 +76,8 @@ async def scheduler():
     while True:
         steps = query.get_unscheduled_flow_run_steps()
 
-        for step in steps:
-            asyncio.create_task(step.run_step(step))
+        for run_step in steps:
+            asyncio.create_task(step.run_step(run_step))
 
         await create_steps_for_scheduled_runs()
         await asyncio.sleep(1)

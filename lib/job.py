@@ -12,7 +12,7 @@ def create_job_object(step: dict) -> client.models.v1_job.V1Job:
     unique_name = f"{step['name']}-{step['id']}"
 
     params = {k: v for k, v in step.items() if k in container_params}
-    container = client.V1Container(image_pull_policy="Never", **params)
+    container = client.V1Container(image_pull_policy="Always", **params)
 
     # Create and configurate a spec section
     template = client.V1PodTemplateSpec(
